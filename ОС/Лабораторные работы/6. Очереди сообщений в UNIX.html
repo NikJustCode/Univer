@@ -1,0 +1,413 @@
+
+<!-- saved from url=(0075)http://www.intuit.ru/department/os/osintropractice/6/osintropractice_6.html -->
+<HTML><HEAD><META http-equiv="Content-Type" content="text/html; charset=windows-1251">
+
+<TITLE>INTUIT.ru::Интернет-Университет Информационных Технологий</TITLE>
+<LINK href="./6. Очереди сообщений в UNIX_files/printable.css" type="text/css" rel="stylesheet">
+</HEAD><BODY leftmargin="6" topmargin="6" marginheight="6" marginwidth="6">
+
+<DIV align="left">
+<SPAN style="color: #000000; font-weight: bold;">
+&nbsp;&nbsp;
+<SPAN style="font-size:12pt;">Интернет-Университет Информационных Технологий</SPAN>
+</SPAN>
+</DIV>
+
+&nbsp;&nbsp;
+<SPAN align="rright" style="color: #330066; text-decoration:underline;">http://www.INTUIT.ru</SPAN>
+
+
+<TABLE border="0" cellpadding="0" cellspacing="0" width="100%">
+<TBODY><TR><TD height="8" colspan="3"><IMG src="./6. Очереди сообщений в UNIX_files/empty.gif" width="1" height="8"></TD></TR>
+<TR><TD class="orang" height="1" colspan="3"><IMG src="./6. Очереди сообщений в UNIX_files/empty.gif" width="1" height="1"></TD></TR>
+<TR><TD height="8" colspan="3"><IMG src="./6. Очереди сообщений в UNIX_files/empty.gif" width="1" height="8"></TD></TR>
+<TR valign="top">
+<TD><IMG src="./6. Очереди сообщений в UNIX_files/empty.gif" width="8" height="1"></TD>
+<TD>
+	<!-- content -->
+	<TABLE border="0" cellpadding="0" cellspacing="0" width="100%">
+	<TBODY><TR><TD class="head">Основы операционных систем. Практикум</TD></TR>
+<TR><TD height="4"><IMG src="./6. Очереди сообщений в UNIX_files/empty.gif" width="1" height="4"></TD></TR>
+	<TR><TD class="orang" height="1"><IMG src="./6. Очереди сообщений в UNIX_files/empty.gif" width="1" height="1"></TD></TR>
+	<TR><TD height="8"><IMG src="./6. Очереди сообщений в UNIX_files/empty.gif" width="1" height="8"></TD></TR>
+	<TR><TD><SPAN class="headsub">
+
+
+6. Лекция:
+
+ Очереди сообщений в UNIX: версия для печати и PDA</SPAN>
+
+<BR>
+<SPAN class="rtxt">Сообщения как средства связи и средства синхронизации процессов. Очереди сообщений в UNIX как составная часть System V IPC. Создание очереди сообщений или доступ к уже существующей. Системный вызов msgget(). Реализация примитивов send и receive. Системные вызовы msgsnd() и msgrcv(). Удаление очереди сообщений из системы с помощью команды ipcrm или системного вызова msgctl(). Понятие мультиплексирования. Мультиплексирование сообщений. Модель взаимодействия процессов клиент-сервер. Неравноправность клиента и сервера. Использование очередей сообщений для синхронизации работы процессов. 
+</SPAN>
+
+</TD></TR>
+
+	<TR><TD height="8"><IMG src="./6. Очереди сообщений в UNIX_files/empty.gif" width="1" height="8"></TD></TR>
+	<TR><TD class="orang" height="1"><IMG src="./6. Очереди сообщений в UNIX_files/empty.gif" width="1" height="1"></TD></TR>
+	<TR><TD height="8"><IMG src="./6. Очереди сообщений в UNIX_files/empty.gif" width="1" height="8"></TD></TR>
+	<TR><TD>
+
+
+<A name="sect1"></A><H3>Сообщения как средства связи и средства синхронизации процессов </H3><P id="id_1">В материалах предыдущих семинаров были представлены такие средства организации взаимодействия процессов из состава средств System V IPC, как разделяемая память (семинары 6–7) и семафоры (семинар 8). Третьим и последним, наиболее семантически нагруженным средством, входящим в System V IPC, являются <SPAN class="keyword">очереди сообщений</SPAN>. В лекции 6 говорилось о модели сообщений как о способе взаимодействия процессов через линии связи, в котором на передаваемую информацию накладывается определенная структура, так что процесс, принимающий данные, может четко определить, где заканчивается одна порция информации и начинается другая. Такая модель позволяет задействовать одну и ту же линию связи для передачи данных в двух направлениях между несколькими процессами. Мы также рассматривали возможность использования сообщений с встроенными механизмами взаимоисключения и блокировки при чтении из пустого буфера и записи в переполненный буфер для организации синхронизации процессов.
+</P><DIV class="lecture_mark" id="mark_1"></DIV><P id="id_2">В материалах этого семинара речь пойдет об использовании <SPAN class="keyword">очередей сообщений System V IPC</SPAN> для обеспечения обеих названных функций.</P><DIV class="lecture_mark" id="mark_2"></DIV><A name="sect2"></A><H3>Очереди сообщений в UNIX как составная часть System V IPC </H3><P id="id_3">Так как <SPAN class="keyword">очереди сообщений</SPAN> входят в состав средств System V IPC, для них верно все, что говорилось ранее об этих средствах в целом и уже знакомо нам. <SPAN class="keyword">Очереди сообщений</SPAN>, как и семафоры, и разделяемая память, являются средством связи с непрямой адресацией, требуют инициализации для организации взаимодействия процессов и специальных действий для освобождения системных ресурсов по окончании взаимодействия. Пространством имен <SPAN class="keyword">очередей сообщений</SPAN> является то же самое множество значений ключа, генерируемых с помощью функции <SPAN class="texample">ftok()</SPAN> (см. семинары 6–7 раздел "Пространство имен. Адресация в System V IPC. Функция <SPAN class="texample">ftok()</SPAN>"). Для выполнения примитивов <SPAN class="texample">send</SPAN> и <SPAN class="texample">receive</SPAN>, введенных в лекции 6, соответствующим системным вызовам в качестве параметра передаются IPC-дескрипторы 
+(см. семинары 6–7 раздел "Дескрипторы System V IPC") <SPAN class="keyword">очередей сообщений</SPAN>, однозначно идентифицирующих их во всей вычислительной системе. </P><DIV class="lecture_mark" id="mark_3"></DIV><P id="id_8"><SPAN class="keyword">Очереди сообщений</SPAN> располагаются в адресном пространстве ядра операционной системы в виде однонаправленных списков и имеют ограничение по объему информации, хранящейся в каждой очереди. Каждый элемент списка представляет собой отдельное сообщение. <A name="keyword-context.1"></A>Сообщения имеют атрибут, называемый <SPAN class="keyword_def">типом сообщения</SPAN>. Выборка сообщений из <SPAN class="keyword">очереди</SPAN> (выполнение примитива <SPAN class="texample">receive</SPAN>) может осуществляться тремя способами:</P><DIV class="lecture_mark" id="mark_8"></DIV><OL id="id_10"><LI>В порядке FIFO, независимо от <SPAN class="keyword">типа сообщения</SPAN>. </LI><LI>В порядке FIFO для сообщений конкретного <SPAN class="keyword">типа</SPAN>. </LI><LI>Первым выбирается сообщение с минимальным <SPAN class="keyword">типом</SPAN>, не превышающим некоторого заданного значения, пришедшее раньше других сообщений с тем же <SPAN class="keyword">типом</SPAN>. </LI></OL><DIV class="lecture_mark" id="mark_10"></DIV><P id="id_14">Реализация примитивов <SPAN class="texample">send</SPAN> и <SPAN class="texample">receive</SPAN> обеспечивает скрытое от пользователя взаимоисключение во время помещения сообщения в <SPAN class="keyword">очередь</SPAN> или его получения из <SPAN class="keyword">очереди</SPAN>. Также она обеспечивает блокировку процесса при попытке выполнить примитив <SPAN class="texample">receive</SPAN> над пустой очередью или очередью, в которой отсутствуют сообщения запрошенного <SPAN class="keyword">типа</SPAN>, или при попытке выполнить примитив <SPAN class="texample">send</SPAN> для очереди, в которой нет свободного места.</P><DIV class="lecture_mark" id="mark_14"></DIV><P id="id_19"><SPAN class="keyword">Очереди сообщений</SPAN>, как и другие средства System V IPC, позволяют организовать взаимодействие процессов, не находящихся одновременно в вычислительной системе. </P><DIV class="lecture_mark" id="mark_19"></DIV><A name="sect3"></A><H3>Создание очереди сообщений или доступ к уже существующей. Системный вызов msgget() </H3><P id="id_20"><A name="keyword-context.2"></A>Для создания <SPAN class="keyword">очереди сообщений</SPAN>, ассоциированной с определенным ключом, или доступа по ключу к уже существующей очереди используется системный вызов <SPAN class="texample"><SPAN class="keyword_def">msgget()</SPAN></SPAN>, являющийся аналогом системных вызовов <SPAN class="texample">shmget()</SPAN> для разделяемой памяти и <SPAN class="texample">semget()</SPAN> для массива семафоров, который возвращает значение IPC-дескриптора для этой <SPAN class="keyword">очереди</SPAN>. При этом существуют те же способы создания и доступа, что и для разделяемой памяти или семафоров (см. семинары 6–7 раздел "Разделяемая память в UNIX. Системные вызовы <SPAN class="texample">shmget()</SPAN>, <SPAN class="texample">shmat()</SPAN>, <SPAN class="texample">shmdt()</SPAN>" и см. семинар 8 раздел "Создание массива семафоров или доступ к уже существующему. Системный вызов <SPAN class="texample">semget()</SPAN>", соответственно). </P><DIV class="lecture_mark" id="mark_20"></DIV><DIV class="xml_table_env" id="id_28"><A name=""></A><TABLE border="0" class="xml_table" cellpadding="2" cellspacing="1"><TBODY><TR><TD bgcolor="#eaeaea" valign="top">
+
+<P id="id_29"><B>Системный вызов msgget()</B></P><DIV class="lecture_mark" id="mark_29"></DIV>
+
+<P id="id_30"><B>Прототип системного вызова</B></P><DIV class="lecture_mark" id="mark_30"></DIV>
+
+<DIV class="example"><PRE>#include &lt;types.h&gt;
+#include &lt;ipc.h&gt;
+#include &lt;msg.h&gt;
+
+int msgget(key_t key, int msgflg);
+</PRE></DIV>
+
+<P id="id_32"><B>Описание системного вызова</B></P><DIV class="lecture_mark" id="mark_32"></DIV>
+
+<P id="id_33">Системный вызов <SPAN class="texample"><SPAN class="keyword">msgget</SPAN></SPAN> предназначен для выполнения операции доступа к очереди сообщений и, в случае ее успешного завершения, возвращает дескриптор System V IPC для этой очереди (целое неотрицательное число, однозначно характеризующее очередь сообщений внутри вычислительной системы и использующееся в дальнейшем для других операций с ней).</P><DIV class="lecture_mark" id="mark_33"></DIV>
+
+<P id="id_35">Параметр <SPAN class="texample">key</SPAN> является ключом System V IPC для очереди сообщений, т. е. фактически ее именем из пространства имен System V IPC. В качестве значения этого параметра может быть использовано значение ключа, полученное с помощью функции <SPAN class="texample">ftok()</SPAN>, или специальное значение <SPAN class="texample">IPC_PRIVATE</SPAN>. Использование значения <SPAN class="texample">IPC_PRIVATE</SPAN> всегда приводит к попытке создания новой очереди сообщений с ключом, который не совпадает со значением ключа ни одной из уже существующих очередей и не может быть получен с помощью функции <SPAN class="texample">ftok()</SPAN> ни при одной комбинации ее параметров.</P><DIV class="lecture_mark" id="mark_35"></DIV>
+
+<P id="id_41">Параметр <SPAN class="texample">msgflg</SPAN> – флаги – играет роль только при создании новой очереди сообщений и определяет права различных пользователей при доступе к очереди, а также необходимость создания новой очереди и поведение системного вызова при попытке создания. Он является некоторой комбинацией (с помощью операции побитовое или – "<SPAN class="texample">|</SPAN>") следующих предопределенных значений и восьмеричных прав доступа:</P><DIV class="lecture_mark" id="mark_41"></DIV>
+
+<UL id="id_44"><LI><SPAN class="texample">IPC_CREAT</SPAN> — если очереди для указанного ключа не существует, она должна быть создана;</LI><LI><SPAN class="texample">IPC_EXCL</SPAN> — применяется совместно с флагом <SPAN class="texample">IPC_CREAT</SPAN>. При совместном их использовании и существовании массива с указанным ключом доступ к очереди не производится и констатируется ошибочная ситуация, при этом переменная <SPAN class="texample">errno</SPAN>, описанная в файле <SPAN class="texample">&lt;errno.h&gt;</SPAN>, примет значение <SPAN class="texample">EEXIST</SPAN>;</LI><LI><SPAN class="texample">0400</SPAN> — разрешено чтение для пользователя, создавшего очередь;</LI><LI><SPAN class="texample">0200</SPAN> — разрешена запись для пользователя, создавшего очередь;</LI><LI><SPAN class="texample">0040</SPAN> — разрешено чтение для группы пользователя, создавшего очередь;</LI><LI><SPAN class="texample">0020</SPAN> — разрешена запись для группы пользователя, создавшего очередь;</LI><LI><SPAN class="texample">0004</SPAN> — разрешено чтение для всех остальных пользователей;</LI><LI><SPAN class="texample">0002</SPAN> — разрешена запись для всех остальных пользователей;</LI></UL><DIV class="lecture_mark" id="mark_44"></DIV>
+
+<P id="id_65">Очередь сообщений имеет ограничение по общему количеству хранимой информации, которое может быть изменено администратором системы. Текущее значение ограничения можно узнать с помощью команды </P><DIV class="lecture_mark" id="mark_65"></DIV>
+
+<DIV class="example"><PRE>ipcs -l </PRE></DIV>
+
+<P id="id_67"><B>Возвращаемое значение</B></P><DIV class="lecture_mark" id="mark_67"></DIV>
+
+<P id="id_68">Системный вызов возвращает значение дескриптора System V IPC для очереди сообщений при нормальном завершении и значение <SPAN class="texample">-1</SPAN> при возникновении ошибки.</P><DIV class="lecture_mark" id="mark_68"></DIV>
+
+</TD></TR></TBODY></TABLE></DIV><DIV class="lecture_mark" id="mark_28"></DIV><A name="sect4"></A><H3>Реализация примитивов send и receive. Системные вызовы msgsnd() и msgrcv() </H3><P id="id_70"><A name="keyword-context.3"></A>Для выполнения примитива <SPAN class="texample">send</SPAN> используется системный вызов <SPAN class="texample"><SPAN class="keyword_def">msgsnd()</SPAN></SPAN>, копирующий пользовательское сообщение в <SPAN class="keyword">очередь сообщений</SPAN>, заданную IPC-дескриптором. При изучении описания этого вызова обратите особое внимание на следующие моменты: </P><DIV class="lecture_mark" id="mark_70"></DIV><UL id="id_73"><LI>Тип данных <SPAN class="texample">struct msgbuf</SPAN> не является типом данных для пользовательских сообщений, а представляет собой лишь <SPAN class="keyword">шаблон</SPAN> для создания таких типов. Пользователь сам должен создать структуру для своих сообщений, в которой первым полем должна быть переменная типа <SPAN class="texample">long</SPAN>, содержащая положительное значение <SPAN class="keyword">типа сообщения</SPAN>. </LI><LI>В качестве третьего параметра – длины сообщения – указывается не вся длина структуры данных, соответствующей сообщению, а только длина полезной информации, т. е. информации, располагающейся в структуре данных после <SPAN class="keyword">типа сообщения</SPAN>. Это значение может быть и равным <SPAN class="texample">0</SPAN> в случае, когда вся полезная информация заключается в самом факте прихода сообщения (сообщение используется как сигнальное средство связи). </LI><LI>В материалах семинаров мы, как правило, будем использовать нулевое значение флага системного вызова, которое приводит к блокировке процесса при отсутствии свободного места в <SPAN class="keyword">очереди сообщений</SPAN>. </LI></UL><DIV class="lecture_mark" id="mark_73"></DIV><DIV class="xml_table_env" id="id_80"><A name=""></A><TABLE border="0" class="xml_table" cellpadding="2" cellspacing="1"><TBODY><TR><TD bgcolor="#eaeaea" valign="top">
+
+<P id="id_81"><B>Системный вызов msgsnd()</B></P><DIV class="lecture_mark" id="mark_81"></DIV>
+
+<P id="id_82"><B>Прототип системного вызова</B></P><DIV class="lecture_mark" id="mark_82"></DIV>
+
+<DIV class="example"><PRE>#include &lt;sys/types.h&gt;
+#include &lt;sys/ipc.h&gt;
+#include &lt;sys/msg.h&gt;
+
+int msgsnd(int msqid, struct msgbuf *ptr,
+int length, int flag);
+</PRE></DIV>
+
+<P id="id_84"><B>Описание системного вызова</B></P><DIV class="lecture_mark" id="mark_84"></DIV>
+
+<P id="id_85">Системный вызов <SPAN class="texample"><SPAN class="keyword">msgsnd</SPAN></SPAN> предназначен для помещения сообщения в очередь сообщений, т. е. является реализацией примитива send.</P><DIV class="lecture_mark" id="mark_85"></DIV>
+
+<P id="id_87">Параметр <SPAN class="texample">msqid</SPAN> является дескриптором System V IPC для очереди, в которую отправляется сообщение, т. е. значением, которое вернул системный вызов <SPAN class="texample"><SPAN class="keyword">msgget()</SPAN></SPAN> при создании очереди или при ее поиске по ключу.</P><DIV class="lecture_mark" id="mark_87"></DIV>
+
+<P id="id_90">Структура <SPAN class="texample">struct msgbuf</SPAN> описана в файле <SPAN class="texample">&lt;sys/msg.h&gt;</SPAN> как</P><DIV class="lecture_mark" id="mark_90"></DIV>
+
+<DIV class="example"><PRE>struct msgbuf {
+long mtype;
+char mtext[1];
+};
+</PRE></DIV>
+
+<P id="id_94">Она представляет собой некоторый шаблон структуры сообщения пользователя. Сообщение пользователя – это структура, первый элемент которой обязательно имеет тип <SPAN class="texample">long</SPAN> и содержит тип сообщения, а далее следует информативная часть теоретически произвольной длины (практически в Linux она ограничена размером 4080 байт и может быть еще уменьшена системным администратором), содержащая собственно суть сообщения. Например:</P><DIV class="lecture_mark" id="mark_94"></DIV>
+
+<DIV class="example"><PRE>struct mymsgbuf {
+long mtype;
+char mtext[1024];
+} mybuf;
+</PRE></DIV>
+
+<P id="id_97">При этом информация вовсе не обязана быть текстовой, например:</P><DIV class="lecture_mark" id="mark_97"></DIV>
+
+<DIV class="example"><PRE>struct mymsgbuf {
+long mtype;
+struct {
+int iinfo;
+float finfo;
+} info;
+} mybuf;
+</PRE></DIV>
+
+<P id="id_99">Тип сообщения должен быть строго положительным числом. Действительная длина полезной части информации (т. е. информации, расположенной в структуре после типа сообщения) должна быть передана системному вызову в качестве параметра <SPAN class="texample">length</SPAN>. Этот параметр может быть равен и <SPAN class="texample">0</SPAN>, если вся полезная информация заключается в самом факте наличия сообщения. Системный вызов копирует сообщение, расположенное по адресу, на который указывает параметр <SPAN class="texample">ptr</SPAN>, в очередь сообщений, заданную дескриптором <SPAN class="texample">msqid</SPAN>.</P><DIV class="lecture_mark" id="mark_99"></DIV>
+
+<P id="id_104">Параметр <SPAN class="texample">flag</SPAN> может принимать два значения: <SPAN class="texample">0</SPAN> и <SPAN class="texample">IPC_NOWAIT</SPAN>. Если значение флага равно <SPAN class="texample">0</SPAN>, и в очереди не хватает места для того, чтобы поместить сообщение, то системный вызов блокируется до тех пор, пока не освободится место. При значении флага <SPAN class="texample">IPC_NOWAIT</SPAN> системный вызов в этой ситуации не блокируется, а констатирует возникновение ошибки с установлением значения переменной <SPAN class="texample">errno</SPAN>, описанной в файле <SPAN class="texample">&lt;errno.h&gt;</SPAN>, равным <SPAN class="texample">EAGAIN</SPAN>.</P><DIV class="lecture_mark" id="mark_104"></DIV>
+
+<P id="id_113"><B>Возвращаемое значение</B></P><DIV class="lecture_mark" id="mark_113"></DIV>
+
+<P id="id_114">Системный вызов возвращает значение <SPAN class="texample">0</SPAN> при нормальном завершении и значение <SPAN class="texample">-1</SPAN> при возникновении ошибки.</P><DIV class="lecture_mark" id="mark_114"></DIV>
+
+</TD></TR></TBODY></TABLE></DIV><DIV class="lecture_mark" id="mark_80"></DIV><P id="id_117"><A name="keyword-context.4"></A>Примитив <SPAN class="texample">receive</SPAN> реализуется системным вызовом <SPAN class="texample"><SPAN class="keyword_def">msgrcv()</SPAN></SPAN>. При изучении описания этого вызова нужно обратить особое внимание на следующие моменты:</P><DIV class="lecture_mark" id="mark_117"></DIV><UL id="id_120"><LI>Тип данных <SPAN class="texample">struct msgbuf</SPAN>, как и для вызова <SPAN class="texample"><SPAN class="keyword">msgsnd()</SPAN></SPAN>, является лишь шаблоном для пользовательского типа данных. </LI><LI>Способ <SPAN class="keyword">выбора сообщения</SPAN> (см. раздел "<SPAN class="keyword">Очереди сообщений</SPAN> в UNIX как составная часть System V IPC" текущего семинара) задается нулевым, положительным или отрицательным значением параметра <SPAN class="texample">type</SPAN>. Точное значение типа выбранного сообщения можно определить из соответствующего поля структуры, в которую системный вызов скопирует сообщение. </LI><LI>Системный вызов возвращает длину только полезной части скопированной информации, т. е. информации, расположенной в структуре после поля <SPAN class="keyword">типа сообщения</SPAN>. </LI><LI>Выбранное сообщение удаляется из <SPAN class="keyword">очереди сообщений</SPAN>. </LI><LI>В качестве параметра <SPAN class="texample">length</SPAN> указывается максимальная длина полезной части информации, которая может быть размещена в структуре, адресованной параметром <SPAN class="texample">ptr</SPAN>. </LI><LI>В материалах семинаров мы будем, как правило, пользоваться нулевым значением флагов для системного вызова, которое приводит к блокировке процесса в случае отсутствия в <SPAN class="keyword">очереди сообщений</SPAN> с запрошенным типом и к ошибочной ситуации в случае, когда длина информативной части выбранного сообщения превышает длину, специфицированную в параметре <SPAN class="texample">length</SPAN>. </LI></UL><DIV class="lecture_mark" id="mark_120"></DIV><DIV class="xml_table_env" id="id_133"><A name=""></A><TABLE border="0" class="xml_table" cellpadding="2" cellspacing="1"><TBODY><TR><TD bgcolor="#eaeaea" valign="top">
+
+<P id="id_134"><B>Системный вызов msgrcv()</B></P><DIV class="lecture_mark" id="mark_134"></DIV>
+
+<P id="id_135"><B>Прототип системного вызова</B></P><DIV class="lecture_mark" id="mark_135"></DIV>
+
+<DIV class="example"><PRE>#include &lt;sys/types.h&gt;
+#include &lt;sys/ipc.h&gt;
+#include &lt;sys/msg.h&gt;
+
+int msgrcv(int msqid, struct msgbuf *ptr,
+int length, long type, int flag);
+</PRE></DIV>
+
+<P id="id_137"><B>Описание системного вызова</B></P><DIV class="lecture_mark" id="mark_137"></DIV>
+
+<P id="id_138">Системный вызов <SPAN class="texample"><SPAN class="keyword">msgrcv</SPAN></SPAN> предназначен для получения сообщения из очереди сообщений, т. е. является реализацией примитива receive.</P><DIV class="lecture_mark" id="mark_138"></DIV>
+
+<P id="id_146">Параметр <SPAN class="texample">msqid</SPAN> является дескриптором System V IPC для очереди, из которой должно быть получено сообщение, т. е. значением, которое вернул системный вызов <SPAN class="texample"><SPAN class="keyword">msgget()</SPAN></SPAN> при создании очереди или при ее поиске по ключу.</P><DIV class="lecture_mark" id="mark_146"></DIV>
+
+<P id="id_149">Параметр <SPAN class="texample">type</SPAN> определяет способ выборки сообщения из очереди следующим образом</P><DIV class="lecture_mark" id="mark_149"></DIV>
+
+<DIV class="xml_table_env" id="id_140"><A name=""></A><TABLE border="0" class="xml_table" cellpadding="2" cellspacing="1"><TBODY><TR><TH bgcolor="#d8d8d8">Способ выборки</TH><TH bgcolor="#d8d8d8">Значение параметра type</TH></TR><TR><TD bgcolor="#eaeaea" valign="top">В порядке FIFO, независимо от типа сообщения</TD><TD bgcolor="#eaeaea" valign="top"><SPAN class="texample">0</SPAN></TD></TR><TR><TD bgcolor="#eaeaea" valign="top">В порядке FIFO для сообщений с типом <SPAN class="texample">n</SPAN> </TD><TD bgcolor="#eaeaea" valign="top"><SPAN class="texample">n</SPAN></TD></TR><TR><TD bgcolor="#eaeaea" valign="top">Первым выбирается сообщение с минимальным типом, не превышающим значения <SPAN class="texample">n</SPAN>, пришедшее ранее всех других сообщений с тем же типом</TD><TD bgcolor="#eaeaea" valign="top"><SPAN class="texample">-n</SPAN></TD></TR></TBODY></TABLE></DIV><DIV class="lecture_mark" id="mark_140"></DIV>
+
+<P id="id_151">Структура <SPAN class="texample">struct msgbuf</SPAN> описана в файле <SPAN class="texample">&lt;sys/msg.h&gt;</SPAN> как</P><DIV class="lecture_mark" id="mark_151"></DIV>
+
+<DIV class="example"><PRE>struct msgbuf {
+long mtype;
+char mtext[1];
+};
+</PRE></DIV>
+
+<P id="id_155">Она представляет собой некоторый шаблон структуры сообщения пользователя. Сообщение пользователя – это структура, первый элемент которой обязательно имеет тип <SPAN class="texample">long</SPAN> и содержит тип сообщения, а далее следует информативная часть теоретически произвольной длины (практически в Linux она ограничена размером 4080 байт и может быть еще уменьшена системным администратором), содержащая собственно суть сообщения. Например:</P><DIV class="lecture_mark" id="mark_155"></DIV>
+
+<DIV class="example"><PRE>struct mymsgbuf {
+long mtype;
+char mtext[1024];
+} mybuf;
+</PRE></DIV>
+
+<P id="id_158">При этом информация вовсе не обязана быть текстовой, например:</P><DIV class="lecture_mark" id="mark_158"></DIV>
+
+<DIV class="example"><PRE>struct mymsgbuf {
+long mtype;
+struct {
+int iinfo;
+float finfo;
+} info;
+} mybuf;
+</PRE></DIV>
+
+<P id="id_160">Параметр <SPAN class="texample">length</SPAN> должен содержать максимальную длину полезной части информации (т. е. информации, расположенной в структуре после типа сообщения), которая может быть размещена в сообщении.</P><DIV class="lecture_mark" id="mark_160"></DIV>
+
+<P id="id_162">В случае удачи системный вызов копирует выбранное сообщение из очереди сообщений по адресу, указанному в параметре <SPAN class="texample">ptr</SPAN>, одновременно удаляя его из очереди сообщений.</P><DIV class="lecture_mark" id="mark_162"></DIV>
+
+<P id="id_164">Параметр <SPAN class="texample">flag</SPAN> может принимать значение <SPAN class="texample">0</SPAN> или быть какой-либо комбинацией флагов <SPAN class="texample">IPC_NOWAIT</SPAN> и <SPAN class="texample">MSG_NOERROR</SPAN>. Если флаг <SPAN class="texample">IPC_NOWAIT</SPAN> не установлен и очередь сообщений пуста или в ней нет сообщений с заказанным типом, то системный вызов блокируется до появления запрошенного сообщения. При установлении флага <SPAN class="texample">IPC_NOWAIT</SPAN> системный вызов в этой ситуации не блокируется, а констатирует возникновение ошибки с установлением значения переменной <SPAN class="texample">errno</SPAN>, описанной в файле <SPAN class="texample">&lt;errno.h&gt;</SPAN>, равным <SPAN class="texample">EAGAIN</SPAN>. Если действительная длина полезной части информации в выбранном сообщении превышает значение, указанное в параметре <SPAN class="texample">length</SPAN> и флаг <SPAN class="texample">MSG_NOERROR</SPAN> не установлен, то выборка сообщения не производится, и фиксируется наличие ошибочной ситуации. Если флаг <SPAN class="texample">MSG_NOERROR</SPAN> установлен, то в этом случае ошибки не возникает, а сообщение копируется в сокращенном виде.</P><DIV class="lecture_mark" id="mark_164"></DIV>
+
+<P id="id_177"><B>Возвращаемое значение</B></P><DIV class="lecture_mark" id="mark_177"></DIV>
+
+<P id="id_178">Системный вызов возвращает при нормальном завершении действительную длину полезной части информации (т. е. информации, расположенной в структуре после типа сообщения), скопированной из очереди сообщений, и значение <SPAN class="texample">-1</SPAN> при возникновении ошибки.</P><DIV class="lecture_mark" id="mark_178"></DIV>
+
+</TD></TR></TBODY></TABLE></DIV><DIV class="lecture_mark" id="mark_133"></DIV><P id="id_180">Максимально возможная длина информативной части сообщения в операционной системе Linux составляет 4080 байт и может быть уменьшена при генерации системы. Текущее значение максимальной длины можно определить с помощью команды </P><DIV class="lecture_mark" id="mark_180"></DIV><DIV class="example"><PRE>ipcs -l</PRE></DIV><A name="sect5"></A><H3>Удаление очереди сообщений из системы с помощью команды ipcrm или системного вызова msgctl() </H3><P id="id_182">После завершения процессов, использовавших <SPAN class="keyword">очередь сообщений</SPAN>, она не удаляется из системы автоматически, а продолжает сохраняться в системе вместе со всеми невостребованными сообщениями до тех пор, пока не будет выполнена специальная команда или специальный системный вызов. Для удаления <SPAN class="keyword">очереди сообщений</SPAN> можно воспользоваться уже знакомой нам командой ipcrm, которая в этом случае примет вид: </P><DIV class="lecture_mark" id="mark_182"></DIV><DIV class="example"><PRE>ipcrm msg &lt;IPC идентификатор&gt;</PRE></DIV><P id="id_184">Для получения IPC идентификатора <SPAN class="keyword">очереди сообщений</SPAN> примените команду <SPAN class="texample">ipcs</SPAN>. <A name="keyword-context.5"></A>Можно удалить <SPAN class="keyword">очередь сообщений</SPAN> и с помощью системного вызова <SPAN class="texample"><SPAN class="keyword_def">msgctl()</SPAN></SPAN>. Этот вызов умеет выполнять и другие операции над <SPAN class="keyword">очередью сообщений</SPAN>, но в рамках данного курса мы их рассматривать не будем. Если какой-либо процесс находился в состоянии <B>ожидание</B> при выполнении системного вызова <SPAN class="texample"><SPAN class="keyword">msgrcv()</SPAN></SPAN> или <SPAN class="texample"><SPAN class="keyword">msgsnd()</SPAN></SPAN> для удаляемой очереди, то он будет разблокирован, и системный вызов констатирует наличие ошибочной ситуации.</P><DIV class="lecture_mark" id="mark_184"></DIV><DIV class="xml_table_env" id="id_189"><A name=""></A><TABLE border="0" class="xml_table" cellpadding="2" cellspacing="1"><TBODY><TR><TD bgcolor="#eaeaea" valign="top">
+
+<P id="id_190"><B>Системный вызов msgctl()</B></P><DIV class="lecture_mark" id="mark_190"></DIV>
+
+<P id="id_191"><B>Прототип системного вызова</B></P><DIV class="lecture_mark" id="mark_191"></DIV>
+
+<DIV class="example"><PRE>#include &lt;sys/types.h&gt;
+#include &lt;sys/ipc.h&gt;
+#include &lt;sys/msg.h&gt;
+
+int msgctl(int msqid, int cmd, 
+           struct msqid_ds *buf);
+</PRE></DIV>
+
+<P id="id_193"><B>Описание системного вызова</B></P><DIV class="lecture_mark" id="mark_193"></DIV>
+
+<P id="id_194">Системный вызов <SPAN class="texample"><SPAN class="keyword">msgctl</SPAN></SPAN> предназначен для получения информации об очереди сообщений, изменения ее атрибутов и удаления из системы. Данное описание не является полным описанием системного вызова, а ограничивается рамками текущего курса. Для изучения полного описания обращайтесь к UNIX Manual.</P><DIV class="lecture_mark" id="mark_194"></DIV>
+
+<P id="id_196">В нашем курсе мы будем пользоваться системным вызовом <SPAN class="texample"><SPAN class="keyword">msgctl</SPAN></SPAN> только для удаления очереди сообщений из системы. Параметр <SPAN class="texample">msqid</SPAN> является дескриптором System V IPC для очереди сообщений, т. е. значением, которое вернул системный вызов <SPAN class="texample"><SPAN class="keyword">msgget()</SPAN></SPAN> при создании очереди или при ее поиске по ключу.</P><DIV class="lecture_mark" id="mark_196"></DIV>
+
+<P id="id_200">В качестве параметра <SPAN class="texample">cmd</SPAN> в рамках нашего курса мы всегда будем передавать значение <SPAN class="texample">IPC_RMID</SPAN> – команду для удаления очереди сообщений с заданным идентификатором. Параметр <SPAN class="texample">buf</SPAN> для этой команды не используется, поэтому мы всегда будем подставлять туда значение <SPAN class="texample">NULL</SPAN>.</P><DIV class="lecture_mark" id="mark_200"></DIV>
+
+<P id="id_205"><B>Возвращаемое значение</B></P><DIV class="lecture_mark" id="mark_205"></DIV>
+
+<P id="id_206">Системный вызов возвращает значение <SPAN class="texample">0</SPAN> при нормальном завершении и значение <SPAN class="texample">-1</SPAN> при возникновении ошибки.</P><DIV class="lecture_mark" id="mark_206"></DIV>
+
+</TD></TR></TBODY></TABLE></DIV><DIV class="lecture_mark" id="mark_189"></DIV><A name="sect6"></A><H3>Прогон примера с однонаправленной передачей текстовой информации </H3><P id="id_209">Для иллюстрации сказанного рассмотрим две простые программы.</P><DIV class="lecture_mark" id="mark_209"></DIV><A name="example.9.1a"></A><DIV class="example"><PRE>/* Программа 09-1a.c для иллюстрации работы с 
+очередями сообщений */ 
+/* Эта программа получает доступ к очереди 
+сообщений, отправляет в нее 5 текстовых сообщений с типом 1 и одно
+пустое сообщение с типом 255, которое будет служить для программы 
+09-1b.c сигналом прекращения работы. */ 
+#include &lt;sys/types.h&gt;
+#include &lt;sys/ipc.h&gt;
+#include &lt;sys/msg.h&gt;
+#include &lt;string.h&gt;
+#include &lt;stdio.h&gt;
+#define LAST_MESSAGE 255 /* Тип сообщения для 
+    прекращения работы программы 09-1b.c */ 
+int main()
+{
+    int msqid; /* IPC дескриптор для очереди сообщений */
+char pathname[] = "09-1a.c"; /* Имя файла, 
+        использующееся для генерации ключа. Файл с таким 
+        именем должен существовать в текущей директории */
+    key_t key; /* IPC ключ */ 
+    int i,len; /* Счетчик цикла и длина 
+        информативной части сообщения */
+    /* Ниже следует пользовательская структура для 
+        сообщения */
+    struct mymsgbuf
+    { 
+        long mtype;
+        char mtext[81]; 
+    } mybuf;
+    /* Генерируем IPC ключ из имени файла 09-1a.c в текущей 
+    директории и номера экземпляра очереди сообщений 0. */
+    if((key = ftok(pathname,0)) &lt; 0){
+        printf("Can\'t generate key\n");
+        exit(-1);
+    }
+    /* Пытаемся получить доступ по ключу к очереди сообщений, 
+    если она существует, или создать ее, с правами доступа 
+    read &amp; write для всех пользователей */ 
+    if((msqid = msgget(key, 0666 | IPC_CREAT)) &lt; 0){
+        printf("Can\'t get msqid\n");
+        exit(-1);
+    } 
+    /* Посылаем в цикле 5 сообщений с типом 1 
+    в очередь сообщений, идентифицируемую msqid.*/
+    for (i = 1; i &lt;= 5; i++){
+        /* Сначала заполняем структуру для нашего 
+        сообщения и определяем длину информативной части */ 
+        mybuf.mtype = 1;
+        strcpy(mybuf.mtext, "This is text message");
+        len = strlen(mybuf.mtext)+1;
+        /* Отсылаем сообщение. В случае ошибки сообщаем об 
+        этом и удаляем очередь сообщений из системы. */ 
+        if (msgsnd(msqid, (struct msgbuf *) &amp;mybuf, 
+            len, 0) &lt; 0){
+            printf("Can\'t send message to queue\n");
+            msgctl(msqid, IPC_RMID, 
+                (struct msqid_ds *) NULL);
+            exit(-1);
+        }
+    }
+    /* Отсылаем сообщение, которое заставит получающий процесс
+    прекратить работу, с типом LAST_MESSAGE и длиной 0 */ 
+    mybuf.mtype = LAST_MESSAGE;
+    len = 0;
+    if (msgsnd(msqid, (struct msgbuf *) &amp;mybuf, 
+        len, 0) &lt; 0){
+        printf("Can\'t send message to queue\n");
+        msgctl(msqid, IPC_RMID, 
+            (struct msqid_ds *) NULL);
+        exit(-1);
+    }
+    return 0;
+} 
+</PRE><SPAN class="objectName">
+            Листинг 
+            9.1a.
+            Программа 09-1a.c для иллюстрации работы с очередями сообщений.</SPAN></DIV><A name="example.9.1b"></A><DIV class="example"><PRE>/* Программа 09-1b.c для иллюстрации работы с 
+очередями сообщений */ 
+/* Эта программа получает доступ к очереди сообщений и читает из
+нее сообщения с любым типом в порядке FIFO до тех пор, пока не 
+получит сообщение с типом 255, которое будет служить сигналом 
+прекращения работы. */ 
+#include &lt;sys/types.h&gt;
+#include &lt;sys/ipc.h&gt;
+#include &lt;sys/msg.h&gt;
+#include &lt;string.h&gt;
+#include &lt;stdio.h&gt;
+#define LAST_MESSAGE 255 /* Тип сообщения для 
+    прекращения работы */ 
+int main()
+{
+    int msqid; /* IPC дескриптор для очереди сообщений */
+    char pathname[] = "09-1a.c"; /* Имя файла, 
+        использующееся для генерации ключа. Файл с таким 
+        именем должен существовать в текущей директории */
+    key_t key; /* IPC ключ */ 
+    int len, maxlen; /* Реальная длина и максимальная 
+        длина информативной части сообщения */
+    /* Ниже следует пользовательская структура для сообщения */
+    struct mymsgbuf
+    { 
+        long mtype;
+        char mtext[81]; 
+    } mybuf;
+    /* Генерируем IPC ключ из имени файла 09-1a.c в текущей 
+    директории и номера экземпляра очереди сообщений 0 */
+    if((key = ftok(pathname,0)) &lt; 0){
+        printf("Can\'t generate key\n");
+        exit(-1);
+    }
+    /* Пытаемся получить доступ по ключу к очереди сообщений, 
+    если она существует, или создать ее, с правами доступа 
+    read &amp; write для всех пользователей */ 
+    if((msqid = msgget(key, 0666 | IPC_CREAT)) &lt; 0){
+        printf("Can\'t get msqid\n");
+        exit(-1);
+    } 
+    while(1){
+        /* В бесконечном цикле принимаем сообщения 
+любого типа в порядке FIFO с максимальной длиной информативной 
+части 81 символ до тех пор, пока не поступит сообщение с 
+типом LAST_MESSAGE*/ 
+        maxlen = 81;
+        if(( len = msgrcv(msqid, 
+            (struct msgbuf *) &amp;mybuf, maxlen, 0, 0) &lt; 0){
+            printf("Can\'t receive message from queue\n");
+            exit(-1);
+        }
+        /* Если принятое сообщение имеет тип LAST_MESSAGE, 
+        прекращаем работу и удаляем очередь сообщений из 
+        системы. В противном случае печатаем текст принятого 
+        сообщения. */
+        if (mybuf.mtype == LAST_MESSAGE){
+            msgctl(msqid, IPC_RMID, 
+            (struct msqid_ds *) NULL);
+        exit(0);
+        }
+        printf("message type = %ld, info = %s\n", 
+        mybuf.mtype, mybuf.mtext);
+    }
+    return 0; /* Исключительно для отсутствия 
+        warning'ов при компиляции. */
+}
+</PRE><SPAN class="objectName">
+            Листинг 
+            9.1b.
+            Программа 09-1b.c для иллюстрации работы с очередями сообщений.</SPAN></DIV><P id="id_212">Первая из этих программ посылает пять текстовых сообщений с <SPAN class="keyword">типом</SPAN> <SPAN class="texample">1</SPAN> и одно сообщение нулевой длины с <SPAN class="keyword">типом</SPAN> <SPAN class="texample">255</SPAN> второй программе. Вторая программа в цикле принимает сообщения любого <SPAN class="keyword">типа</SPAN> в порядке FIFO и печатает их содержимое до тех пор, пока не получит сообщение с <SPAN class="keyword">типом</SPAN> <SPAN class="texample">255</SPAN>. Сообщение с <SPAN class="keyword">типом</SPAN> <SPAN class="texample">255</SPAN> служит для нее сигналом к завершению работы и ликвидации <SPAN class="keyword">очереди сообщений</SPAN>. Если перед запуском любой из программ <SPAN class="keyword">очередь сообщений</SPAN> еще отсутствовала в системе, то программа создаст ее. </P><DIV class="lecture_mark" id="mark_212"></DIV><P id="id_217">Обратите внимание на использование сообщения с <SPAN class="keyword">типом</SPAN> <SPAN class="texample">255</SPAN> в качестве сигнала прекращения работы второго процесса. Это сообщение имеет нулевую длину, так как его информативность исчерпывается самим фактом наличия сообщения.</P><DIV class="lecture_mark" id="mark_217"></DIV><P id="id_219">Наберите программы, сохраните под именами <SPAN class="texample">09-1а.с</SPAN> и <SPAN class="texample">09-1b.c</SPAN> cоответственно, откомпилируйте и проверьте правильность их поведения.</P><DIV class="lecture_mark" id="mark_219"></DIV><A name="sect7"></A><H3>Модификация предыдущего примера для передачи числовой информации </H3><P id="id_222"><B>В описании системных вызовов</B> <SPAN class="texample"><SPAN class="keyword">msgsnd()</SPAN></SPAN> <B>и</B> <SPAN class="texample"><SPAN class="keyword">msgrcv()</SPAN></SPAN> <B>говорится о том, что передаваемая информации не обязательно должна представлять собой текст.</B> </P><DIV class="lecture_mark" id="mark_222"></DIV><P id="id_225">Мы можем воспользоваться <SPAN class="keyword">очередями сообщений</SPAN> для передачи данных любого вида. При передаче разнородной информации целесообразно информативную часть объединять внутри сообщения в отдельную структуру: </P><DIV class="lecture_mark" id="mark_225"></DIV><DIV class="example"><PRE>struct mymsgbuf { 
+    long mtype;
+    struct { 
+        short sinfo;
+        float finfo;
+    } info;
+} mybuf; 
+</PRE></DIV><P id="id_227">для правильного вычисления длины информативной части. В некоторых вычислительных системах числовые данные размещаются в памяти с выравниванием на определенные адреса (например, на адреса, кратные 4). Поэтому реальный размер памяти, необходимой для размещения нескольких числовых данных, может оказаться больше суммы длин этих данных, т. е. в нашем случае </P><DIV class="lecture_mark" id="mark_227"></DIV><DIV class="example"><PRE>sizeof(info)&gt;=sizeof(short)+sizeof(float)
+</PRE></DIV><P id="id_229">Для полной передачи информативной части сообщения в качестве длины нужно указывать не сумму длин полей, а полную длину структуры. Модифицируйте предыдущие программы <SPAN class="texample">09-1a.c</SPAN> и <SPAN class="texample">09-1b.c</SPAN> из раздела "Прогон примера с однонаправленной передачей текстовой информации" для передачи нетекстовых сообщений. </P><DIV class="lecture_mark" id="mark_229"></DIV><A name="sect8"></A><H3>Написание, компиляция и прогон программ для осуществления двусторонней связи через одну очередь сообщений </H3><P id="id_232">Наличие у сообщений <SPAN class="keyword">типов</SPAN> позволяет организовать двустороннюю связь между процессами через одну и ту же <SPAN class="keyword">очередь сообщений</SPAN>. Процесс 1 может посылать процессу 2 сообщения с <SPAN class="keyword">типом</SPAN> 1, а получать от него сообщения с <SPAN class="keyword">типом</SPAN> 2. При этом для <SPAN class="keyword">выборки сообщений</SPAN> в обоих процессах следует пользоваться вторым способом выбора (см. раздел "Очереди сообщений в UNIX как составная часть System V IPC"). Напишите, откомпилируйте и прогоните программы, осуществляющие двустороннюю связь через одну <SPAN class="keyword">очередь сообщений</SPAN>. </P><DIV class="lecture_mark" id="mark_232"></DIV><A name="sect9"></A><H3>Понятие мультиплексирования. Мультиплексирование сообщений. Модель взаимодействия процессов клиент-сервер. Неравноправность клиента и сервера </H3><P id="id_233">Используя технику из предыдущего примера, <A name="keyword-context.6"></A>мы можем организовать получение сообщений одним процессом от множества других процессов через одну <SPAN class="keyword">очередь сообщений</SPAN> и отправку им ответов через ту же <SPAN class="keyword">очередь сообщений</SPAN>, т.е. осуществить <SPAN class="keyword_def">мультиплексирование сообщений</SPAN>. Вообще под <SPAN class="keyword">мультиплексированием</SPAN> информации понимают возможность одновременного обмена информацией с несколькими партнерами. Метод <SPAN class="keyword">мультиплексирования</SPAN> широко применяется в модели взаимодействия процессов <SPAN class="keyword">клиент-сервер</SPAN>. В этой модели один из процессов является сервером. Сервер получает запросы от других процессов – клиентов – на выполнение некоторых действий и отправляет им результаты обработки запросов. Чаще всего 
+<SPAN class="keyword">модель клиент-сервер</SPAN> используется при разработке сетевых приложений, с которыми мы столкнемся в материалах завершающих семинаров курса. Она изначально предполагает, что взаимодействующие процессы неравноправны: </P><DIV class="lecture_mark" id="mark_233"></DIV><UL id="id_234"><LI>Сервер, как правило, работает постоянно, на всем протяжении жизни приложения, а клиенты могут работать эпизодически. </LI><LI>Сервер ждет запроса от клиентов, инициатором же взаимодействия является клиент. </LI><LI>Как правило, клиент обращается к одному серверу за раз, в то время как к серверу могут одновременно поступать запросы от нескольких клиентов. </LI><LI>Клиент должен знать, как обратиться к серверу (например, какого <SPAN class="keyword">типа сообщения</SPAN> он воспринимает) перед началом организации запроса к серверу, в то время как сервер может получить недостающую информацию о клиенте из пришедшего запроса. </LI></UL><DIV class="lecture_mark" id="mark_234"></DIV><P id="id_239">Рассмотрим следующую схему <SPAN class="keyword">мультиплексирования сообщений</SPAN> через одну <SPAN class="keyword">очередь сообщений</SPAN> для <SPAN class="keyword">модели клиент-сервер</SPAN>. Пусть сервер получает из <SPAN class="keyword">очереди сообщений</SPAN> только сообщения с <SPAN class="keyword">типом</SPAN> <SPAN class="texample">1</SPAN>. В состав сообщений с <SPAN class="keyword">типом</SPAN> <SPAN class="texample">1</SPAN>, посылаемых серверу, процессы-клиенты включают значения своих идентификаторов процесса. Приняв сообщение с <SPAN class="keyword">типом</SPAN> <SPAN class="texample">1</SPAN>, сервер анализирует его содержание, выявляет идентификатор процесса, пославшего запрос, и отвечает клиенту, посылая сообщение с <SPAN class="keyword">типом</SPAN>, равным идентификатору запрашивавшего процесса. Процесс-клиент после отправления запроса ожидает ответа в виде сообщения с 
+
+<SPAN class="keyword">типом</SPAN>, равным своему идентификатору. Поскольку идентификаторы процессов в системе различны, и ни один пользовательский процесс не может иметь <SPAN class="texample">PID</SPAN> равный <SPAN class="texample">1</SPAN>, все сообщения могут быть прочитаны только теми процессами, которым они адресованы. Если обработка запроса занимает продолжительное время, сервер может организовывать параллельную обработку запросов, порождая для каждого запроса новый процесс-ребенок или новую нить исполнения. </P><DIV class="lecture_mark" id="mark_239"></DIV><A name="sect10"></A><H3>Написание, компиляция и прогон программ клиента и сервера </H3><P id="id_245">Напишите, откомпилируйте и прогоните программы сервера и клиентов для предложенной схемы <SPAN class="keyword">мультиплексирования сообщений</SPAN>. </P><DIV class="lecture_mark" id="mark_245"></DIV><A name="sect11"></A><H3>Использование очередей сообщений для синхронизации работы процессов</H3><P id="id_246">В лекции 6 была доказана эквивалентность <SPAN class="keyword">очередей сообщений</SPAN> и семафоров в системах, где процессы могут использовать разделяемую память. В частности, было показано, как реализовать семафоры с помощью <SPAN class="keyword">очередей сообщений</SPAN>. Для этого вводился специальный синхронизирующий процесс-сервер, обслуживающий переменные-счетчики для каждого семафора. Процессы-клиенты для выполнения операции над семафором посылали процессу-серверу запросы на выполнение операции и ожидали ответа для продолжения работы. Теперь мы знаем, как это можно сделать в операционной системе UNIX и как, следовательно, можно использовать <SPAN class="keyword">очереди сообщений</SPAN> для организации взаимоисключений и взаимной синхронизации процессов.</P><DIV class="lecture_mark" id="mark_246"></DIV><P id="id_247"><B>Задача повышенной сложности</B>: реализуйте семафоры через <SPAN class="keyword">очереди сообщений</SPAN>. </P><DIV class="lecture_mark" id="mark_247"></DIV>
+
+
+	</TD>
+	</TR>
+	<TR><TD height="8"><IMG src="./6. Очереди сообщений в UNIX_files/empty.gif" width="1" height="8"></TD></TR>
+	</TBODY></TABLE>
+	<!-- /content -->
+
+</TD>
+<TD><IMG src="./6. Очереди сообщений в UNIX_files/empty.gif" width="8" height="1"></TD>
+</TR>
+</TBODY></TABLE>
+<!-- /bottom -->
+<TABLE border="0" cellpadding="0" cellspacing="0" width="100%">
+<TBODY><TR><TD class="orang" height="1"><IMG src="./6. Очереди сообщений в UNIX_files/empty.gif" width="1" height="1"></TD></TR>
+<TR><TD class="ltxt" align="center">© INTUIT.ru, 2003-2009. Все права защищены.</TD>
+</TR>
+</TBODY></TABLE>
+<!-- /bottom -->
+
+<SCRIPT src="./6. Очереди сообщений в UNIX_files/urchin.js" type="text/javascript">
+</SCRIPT>
+<SCRIPT type="text/javascript">
+_uacct = "UA-3475067-1";
+urchinTracker();
+</SCRIPT>
+
+
+</BODY></HTML>

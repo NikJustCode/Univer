@@ -1,0 +1,513 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=windows-1251">
+<title>INTUIT.ru::Интернет-Университет Информационных Технологий</title>
+<link href="5. Алгоритмы синхронизации_files/printabl.css" type="text/css" rel="stylesheet">
+</head>
+<body leftmargin="6" topmargin="6" marginheight="6" marginwidth="6">
+
+
+<div align="left">
+<span style="color: #000000; font-weight: bold;">
+&nbsp;&nbsp;
+<span style="font-size:12pt;">Интернет-Университет Информационных Технологий</span>
+</span>
+</div>
+
+&nbsp;&nbsp;
+<span align="rright" style="color: #330066; text-decoration:underline;">http://www.INTUIT.ru</span>
+
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr><td height="8" colspan=3><img src="5. Алгоритмы синхронизации_files/empty000.gif" width="1" height="8"></td></tr>
+<tr><td class="orang" height="1" colspan=3><img src="5. Алгоритмы синхронизации_files/empty000.gif" width="1" height="1"></td></tr>
+<tr><td height="8" colspan=3><img src="5. Алгоритмы синхронизации_files/empty000.gif" width="1" height="8"></td></tr>
+<tr valign="top">
+<td><img src="5. Алгоритмы синхронизации_files/empty000.gif" width="8" height="1"></td>
+<td>
+	<!-- content -->
+	<table border="0" cellpadding="0" cellspacing="0" width="100%">
+	<tr><td class="head">Основы операционных систем</td></tr>
+<tr><td height="4"><img src="5. Алгоритмы синхронизации_files/empty000.gif" width="1" height="4"></td></tr>
+	<tr><td class="orang" height="1"><img src="5. Алгоритмы синхронизации_files/empty000.gif" width="1" height="1"></td></tr>
+	<tr><td height="8"><img src="5. Алгоритмы синхронизации_files/empty000.gif" width="1" height="8"></td></tr>
+	<tr><td><span class="headsub">
+
+
+5. Лекция:
+
+ Алгоритмы синхронизации: версия для печати и PDA</span>
+
+<br>
+<span class="rtxt">Для корректного взаимодействия процессов недостаточно 
+   одних организационных усилий операционной системы. Необходимы определенные 
+   внутренние изменения в поведении процессов. В настоящей лекции 
+   рассматриваются вопросы, связанные с такими изменениями, приводятся 
+   программные алгоритмы корректной организации взаимодействия процессов.
+</span>
+
+</td></tr>
+
+	<tr><td height="8"><img src="5. Алгоритмы синхронизации_files/empty000.gif" width="1" height="8"></td></tr>
+	<tr><td class="orang" height="1"><img src="5. Алгоритмы синхронизации_files/empty000.gif" width="1" height="1"></td></tr>
+	<tr><td height="8"><img src="5. Алгоритмы синхронизации_files/empty000.gif" width="1" height="8"></td></tr>
+	<tr><td>
+
+
+<h3 ></h3><p  id="id_1">В предыдущей лекции мы говорили о внешних проблемах кооперации, связанных 
+   с организацией взаимодействия процессов со стороны операционной системы. 
+   Предположим, что надежная связь процессов организована, и они умеют обмениваться 
+   информацией. Нужно ли нам предпринимать еще какие-либо действия для организации 
+   правильного решения задачи взаимодействующими процессами? Нужно ли изменять 
+   их внутреннее поведение? Разъяснению этих вопросов и посвящена данная лекция.</p><div  class="lecture_mark" id="mark_1"></div><h3 >Interleaving, race condition и взаимоисключения</h3><p  id="id_2">Давайте временно отвлечемся от операционных систем, процессов и нитей 
+   исполнения и поговорим о некоторых "<span class="keyword">активностях</span>". <a name="keyword-context.1"></a>Под <span class="keyword_def">активностями</span> мы будем 
+   понимать последовательное выполнение ряда действий, направленных на достижение 
+   определенной цели. <span class="keyword">Активности</span> могут иметь место в программном и техническом 
+   обеспечении, в обычной деятельности людей и животных. Мы будем разбивать 
+   <span class="keyword">активности</span> на некоторые неделимые, или <span class="keyword">атомарные</span>, операции. Например, 
+   <span class="keyword">активность</span> "приготовление бутерброда" можно разбить на следующие <span class="keyword">атомарные операции</span>: </p><div  class="lecture_mark" id="mark_2"></div><ol  id="id_3"><li>Отрезать ломтик хлеба.</li><li>Отрезать ломтик колбасы.</li><li>Намазать ломтик хлеба маслом.</li><li>Положить ломтик колбасы на подготовленный ломтик хлеба.</li></ol><div  class="lecture_mark" id="mark_3"></div><p  id="id_8">Неделимые операции могут иметь внутренние невидимые действия (взять 
+   батон хлеба в левую руку, взять нож в правую руку, произвести отрезание). 
+   Мы же называем их неделимыми потому, что считаем выполняемыми за раз, без 
+   прерывания деятельности. </p><div  class="lecture_mark" id="mark_8"></div><p  id="id_9">Пусть имеется две <span class="keyword">активности</span> </p><div  class="lecture_mark" id="mark_9"></div><div  class="example"><pre>
+P:   a b c
+Q:   d e f
+</pre></div><p  id="id_11">где <span class="texample">a, b, c, d, e, f</span> – <span class="keyword">атомарные операции</span>. При последовательном 
+   выполнении <span class="keyword">активностей</span> мы получаем такую последовательность атомарных действий:</p><div  class="lecture_mark" id="mark_11"></div><div  class="example"><pre>
+PQ: a b c d e f
+</pre></div><p  id="id_14">Что произойдет при исполнении этих <span class="keyword">активностей</span> псевдопараллельно, в режиме 
+   разделения времени? <span class="keyword">Активности</span> могут расслоиться на неделимые операции с 
+   различным чередованием, то есть может произойти то, что на английском языке 
+   принято называть словом <span class="keyword">interleaving</span>. Возможные варианты чередования:</p><div  class="lecture_mark" id="mark_14"></div><div  class="example"><pre>
+а b c d e f
+a b d c e f
+a b d e c f
+a b d e f c
+a d b c e f
+......
+d e f a b c
+</pre></div><p  id="id_16"><span class="keyword">Атомарные операции</span> <span class="keyword">активностей</span> могут чередоваться всевозможными 
+   различными способами с сохранением порядка расположения внутри <span class="keyword">активностей</span>. 
+   Так как псевдопараллельное выполнение двух <span class="keyword">активностей</span> приводит к чередованию 
+   их неделимых операций, результат псевдопараллельного выполнения может отличаться 
+   от результата последовательного выполнения. Рассмотрим пример. Пусть у нас 
+   имеется две <span class="keyword">активности</span> <span class="texample">P</span> и <span class="texample">Q</span>, состоящие из двух <span class="keyword">атомарных операций</span> каждая: </p><div  class="lecture_mark" id="mark_16"></div><div  class="example"><pre>
+P:  x=2             Q:  x=3
+    y=x-1               y=x+1
+</pre></div><p  id="id_20">Что мы получим в результате их псевдопараллельного выполнения, если переменные 
+   <span class="texample">x</span> и <span class="texample">y</span> являются для <span class="keyword">активностей</span> общими? Очевидно, что возможны четыре разных набора 
+   значений для пары <span class="texample">(x, y)</span>: <span class="texample">(3, 4)</span>, <span class="texample">(2, 1)</span>, <span class="texample">(2, 3)</span> и <span class="texample">(3, 2)</span>. <a name="keyword-context.2"></a><a name="keyword-context.3"></a>. Мы будем говорить, что 
+   набор <span class="keyword">активностей</span> (например, программ) <span class="keyword_def">детерминирован</span>, если всякий раз при 
+   псевдопараллельном исполнении для одного и того же набора входных данных он 
+   дает одинаковые выходные данные.<span class="keyword"></span> В противном случае он <span class="keyword_def">недетерминирован</span>.  Выше 
+   приведен пример <span class="keyword">недетерминированного набора программ</span>. Понятно, что 
+   <span class="keyword">детерминированный набор</span> <span class="keyword">активностей</span> можно безбоязненно выполнять в режиме 
+   разделения времени. Для <span class="keyword">недетерминированного набора</span> такое исполнение нежелательно.</p><div  class="lecture_mark" id="mark_20"></div><p  id="id_28">Можно ли до получения результатов определить, является ли <span class="keyword">набор</span> 
+   <span class="keyword">активностей</span> детерминированным или нет? Для этого существуют достаточные 
+   <span class="keyword">условия Бернстайна</span>. Изложим их применительно к программам с разделяемыми переменными.</p><div  class="lecture_mark" id="mark_28"></div><p  id="id_29">Введем наборы входных и выходных переменных программы. Для каждой 
+   <span class="keyword">атомарной операции</span> наборы входных и выходных переменных – это наборы 
+   переменных, которые <span class="keyword">атомарная операция</span> считывает и записывает. Набор 
+   входных переменных программы <span class="texample">R(P)</span> (R от слова read) суть объединение 
+   наборов входных переменных для всех ее неделимых действий. Аналогично, 
+   набор выходных переменных программы <span class="texample">W(P)</span> (W от слова write) суть 
+   объединение наборов выходных переменных для всех ее неделимых действий. 
+   Например, для программы </p><div  class="lecture_mark" id="mark_29"></div><div  class="example"><pre>
+P:  x=u+v
+    y=x*w
+</pre></div><p  id="id_33">получаем <span class="texample">R(P) = {u, v, x, w}, W(P) = {x, y}</span>. Заметим, что 
+   переменная <span class="texample">x</span> присутствует как в <span class="texample">R(P)</span>, так и в <span class="texample">W(P)</span>.</p><div  class="lecture_mark" id="mark_33"></div><p  id="id_38">Теперь сформулируем <span class="keyword">условия Бернстайна</span>.</p><div  class="lecture_mark" id="mark_38"></div><p  id="id_39">Если для двух данных <span class="keyword">активностей</span> <span class="texample">P</span> и <span class="texample">Q</span>:</p><div  class="lecture_mark" id="mark_39"></div><ul  id="id_42"><li>пересечение <span class="texample">W(P)</span> и <span class="texample">W(Q)</span> пусто,</li><li>пересечение <span class="texample">W(P)</span> с <span class="texample">R(Q)</span> пусто, </li><li>пересечение <span class="texample">R(P)</span> и <span class="texample">W(Q)</span> пусто,</li></ul><div  class="lecture_mark" id="mark_42"></div><p  id="id_52">тогда выполнение <span class="texample">P</span> и <span class="texample">Q</span> детерминировано.</p><div  class="lecture_mark" id="mark_52"></div><p  id="id_55">Если эти условия не соблюдены, возможно, параллельное выполнение 
+   <span class="texample">P</span> и <span class="texample">Q</span> детерминировано, а может быть, и нет.</p><div  class="lecture_mark" id="mark_55"></div><p  id="id_58">Случай двух <span class="keyword">активностей</span> естественным образом обобщается на их большее количество. </p><div  class="lecture_mark" id="mark_58"></div><p  id="id_59"><span class="keyword">Условия Бернстайна</span> информативны, но слишком жестки. По сути дела, 
+   они требуют практически невзаимодействующих процессов. А нам хотелось 
+   бы, чтобы <span class="keyword">детерминированный набор</span> образовывали <span class="keyword">активности</span>, совместно 
+   использующие информацию и обменивающиеся ею. Для этого нам необходимо 
+   ограничить число возможных чередований <span class="keyword">атомарных операций</span>, исключив 
+   некоторые чередования с помощью механизмов синхронизации выполнения 
+   программ, обеспечив тем самым упорядоченный доступ программ к некоторым данным. </p><div  class="lecture_mark" id="mark_59"></div><p  id="id_60">Про <span class="keyword">недетерминированный набор программ</span> (и <span class="keyword">активностей</span> вообще) 
+   говорят, что он имеет race condition (<span class="keyword">состояние гонки</span> , состояние 
+   состязания). В приведенном выше примере процессы состязаются за 
+   вычисление значений переменных <span class="texample">x</span> и <span class="texample">y</span>. </p><div  class="lecture_mark" id="mark_60"></div><p  id="id_63">Задачу упорядоченного доступа к разделяемым данным (устранение 
+   race condition) в том случае, когда нам не важна его очередность, 
+   можно решить, если обеспечить каждому процессу эксклюзивное право 
+   доступа к этим данным. <a name="keyword-context.4"></a>Каждый процесс, обращающийся к разделяемым 
+   ресурсам, исключает для всех других процессов возможность одновременного 
+   общения с этими ресурсами, если это может привести к недетерминированному 
+   поведению набора процессов. Такой прием называется <span class="keyword">взаимоисключением 
+   (mutual exclusion)</span>. Если очередность доступа к разделяемым ресурсам 
+   важна для получения правильных результатов, то одними <span class="keyword">взаимоисключениями</span> 
+   уже не обойтись, нужна <span class="keyword">взаимосинхронизация</span> поведения программ.</p><div  class="lecture_mark" id="mark_63"></div><h3 >Критическая секция</h3><p  id="id_64">Важным понятием при изучении способов синхронизации процессов 
+   является понятие <span class="keyword">критической секции</span> (critical section) программы. 
+   <a name="keyword-context.5"></a><span class="keyword_def">Критическая секция</span> – это часть программы, исполнение которой может 
+   привести к возникновению race condition для определенного набора 
+   программ. Чтобы исключить эффект гонок по отношению к некоторому 
+   ресурсу, необходимо организовать работу так, чтобы в каждый момент 
+   времени только один процесс мог находиться в своей <span class="keyword">критической секции</span>, 
+   связанной с этим ресурсом. Иными словами, необходимо обеспечить реализацию 
+   <span class="keyword">взаимоисключения</span> для <span class="keyword">критических секций</span> программ. Реализация 
+   <span class="keyword">взаимоисключения</span> для <span class="keyword">критических секций</span> программ с практической 
+   точки зрения означает, что по отношению к другим процессам, 
+   участвующим во взаимодействии, <span class="keyword">критическая секция</span> начинает 
+   выполняться как <span class="keyword">атомарная операция</span>. Давайте рассмотрим следующий 
+   пример, в котором псевдопараллельные взаимодействующие процессы 
+   представлены действиями различных студентов (таблица 5.1): </p><div  class="lecture_mark" id="mark_64"></div><p  id="id_65">Здесь <span class="keyword">критический участок</span> для каждого процесса – от операции 
+   "Обнаруживает, что хлеба нет" до операции "Возвращается в комнату" 
+   включительно. В результате отсутствия <span class="keyword">взаимоисключения</span> мы из ситуации 
+   "Нет хлеба" попадаем в ситуацию "Слишком много хлеба". Если бы 
+   этот <span class="keyword">критический участок</span> выполнялся как <span class="keyword">атомарная операция</span> – 
+   "Достает два батона хлеба", то проблема образования излишков 
+   была бы снята.</p><div  class="lecture_mark" id="mark_65"></div><div  class="xml_table_env" id="id_66"><a name="table.5.1"></a><table border="0" class="xml_table" cellpadding="2" cellspacing="1"><caption>
+                    Таблица 5.1.
+                    </caption><tr><th bgcolor="#d8d8d8">Время</th><th bgcolor="#d8d8d8">Студент 1</th><th bgcolor="#d8d8d8">Студент 2</th><th bgcolor="#d8d8d8">Студент 3</th></tr><tr><td bgcolor="#eaeaea" valign="top">17-05</td><td bgcolor="#eaeaea" valign="top">Приходит в комнату</td><td bgcolor="#eaeaea" valign="top"></td><td bgcolor="#eaeaea" valign="top"></td></tr><tr><td bgcolor="#eaeaea" valign="top">17-07</td><td bgcolor="#eaeaea" valign="top">Обнаруживает,что хлеба нет</td><td bgcolor="#eaeaea" valign="top"></td><td bgcolor="#eaeaea" valign="top"></td></tr><tr><td bgcolor="#eaeaea" valign="top">17-09</td><td bgcolor="#eaeaea" valign="top">Уходит в магазин</td><td bgcolor="#eaeaea" valign="top"></td><td bgcolor="#eaeaea" valign="top"></td></tr><tr><td bgcolor="#eaeaea" valign="top">17-11</td><td bgcolor="#eaeaea" valign="top"></td><td bgcolor="#eaeaea" valign="top">Приходит в комнату</td><td bgcolor="#eaeaea" valign="top"></td></tr><tr><td bgcolor="#eaeaea" valign="top">17-13</td><td bgcolor="#eaeaea" valign="top"></td><td bgcolor="#eaeaea" valign="top">Обнаруживает, что хлеба нет</td><td bgcolor="#eaeaea" valign="top"></td></tr><tr><td bgcolor="#eaeaea" valign="top">17-15</td><td bgcolor="#eaeaea" valign="top"></td><td bgcolor="#eaeaea" valign="top">Уходит в магазин</td><td bgcolor="#eaeaea" valign="top"></td></tr><tr><td bgcolor="#eaeaea" valign="top">17-17</td><td bgcolor="#eaeaea" valign="top"></td><td bgcolor="#eaeaea" valign="top"></td><td bgcolor="#eaeaea" valign="top">Приходит в комнату</td></tr><tr><td bgcolor="#eaeaea" valign="top">17-19</td><td bgcolor="#eaeaea" valign="top"></td><td bgcolor="#eaeaea" valign="top"></td><td bgcolor="#eaeaea" valign="top">Обнаруживает,что хлеба нет</td></tr><tr><td bgcolor="#eaeaea" valign="top">17-21</td><td bgcolor="#eaeaea" valign="top"></td><td bgcolor="#eaeaea" valign="top"></td><td bgcolor="#eaeaea" valign="top">Уходит в магазин</td></tr><tr><td bgcolor="#eaeaea" valign="top">17-23</td><td bgcolor="#eaeaea" valign="top">Приходит в магазин</td><td bgcolor="#eaeaea" valign="top"></td><td bgcolor="#eaeaea" valign="top"></td></tr><tr><td bgcolor="#eaeaea" valign="top">17-25</td><td bgcolor="#eaeaea" valign="top">Покупает 2 батона на всех</td><td bgcolor="#eaeaea" valign="top"></td><td bgcolor="#eaeaea" valign="top"></td></tr><tr><td bgcolor="#eaeaea" valign="top">17-27</td><td bgcolor="#eaeaea" valign="top">Уходит из магазина</td><td bgcolor="#eaeaea" valign="top"></td><td bgcolor="#eaeaea" valign="top"></td></tr><tr><td bgcolor="#eaeaea" valign="top">17-29</td><td bgcolor="#eaeaea" valign="top"></td><td bgcolor="#eaeaea" valign="top">Приходит в магазин</td><td bgcolor="#eaeaea" valign="top"></td></tr><tr><td bgcolor="#eaeaea" valign="top">17-31</td><td bgcolor="#eaeaea" valign="top"></td><td bgcolor="#eaeaea" valign="top">Покупает 2 батона на всех</td><td bgcolor="#eaeaea" valign="top"></td></tr><tr><td bgcolor="#eaeaea" valign="top">17-33</td><td bgcolor="#eaeaea" valign="top"></td><td bgcolor="#eaeaea" valign="top">Уходит из магазина</td><td bgcolor="#eaeaea" valign="top"></td></tr><tr><td bgcolor="#eaeaea" valign="top">17-35</td><td bgcolor="#eaeaea" valign="top"></td><td bgcolor="#eaeaea" valign="top"></td><td bgcolor="#eaeaea" valign="top">Приходит в магазин</td></tr><tr><td bgcolor="#eaeaea" valign="top">17-37</td><td bgcolor="#eaeaea" valign="top"></td><td bgcolor="#eaeaea" valign="top"></td><td bgcolor="#eaeaea" valign="top">Покупает 2 батона на всех</td></tr><tr><td bgcolor="#eaeaea" valign="top">17-39</td><td bgcolor="#eaeaea" valign="top"></td><td bgcolor="#eaeaea" valign="top"></td><td bgcolor="#eaeaea" valign="top">Уходит из магазина</td></tr><tr><td bgcolor="#eaeaea" valign="top">17-41</td><td bgcolor="#eaeaea" valign="top">Возвращается в комнату</td><td bgcolor="#eaeaea" valign="top"></td><td bgcolor="#eaeaea" valign="top"></td></tr><tr><td bgcolor="#eaeaea" valign="top">17-43</td><td bgcolor="#eaeaea" valign="top"></td><td bgcolor="#eaeaea" valign="top"></td><td bgcolor="#eaeaea" valign="top"></td></tr><tr><td bgcolor="#eaeaea" valign="top">17-45</td><td bgcolor="#eaeaea" valign="top"></td><td bgcolor="#eaeaea" valign="top"></td><td bgcolor="#eaeaea" valign="top"></td></tr><tr><td bgcolor="#eaeaea" valign="top">17-47</td><td bgcolor="#eaeaea" valign="top"></td><td bgcolor="#eaeaea" valign="top">Возвращается в комнату</td><td bgcolor="#eaeaea" valign="top"></td></tr><tr><td bgcolor="#eaeaea" valign="top">17-49</td><td bgcolor="#eaeaea" valign="top"></td><td bgcolor="#eaeaea" valign="top"></td><td bgcolor="#eaeaea" valign="top"></td></tr><tr><td bgcolor="#eaeaea" valign="top">17-51</td><td bgcolor="#eaeaea" valign="top"></td><td bgcolor="#eaeaea" valign="top"></td><td bgcolor="#eaeaea" valign="top"></td></tr><tr><td bgcolor="#eaeaea" valign="top">17-53</td><td bgcolor="#eaeaea" valign="top"></td><td bgcolor="#eaeaea" valign="top"></td><td bgcolor="#eaeaea" valign="top">Возвращается в комнату</td></tr></table></div><div  class="lecture_mark" id="mark_66"></div><p  id="id_67">Сделать процесс добывания хлеба <span class="keyword">атомарной операцией</span> можно было 
+   бы следующим образом: перед началом этого процесса закрыть дверь 
+   изнутри на засов и уходить добывать хлеб через окно, а по окончании 
+   процесса вернуться в комнату через окно и отодвинуть засов. Тогда 
+   пока один студент добывает хлеб, все остальные находятся в состоянии 
+   ожидания под дверью (таблица 5.2).</p><div  class="lecture_mark" id="mark_67"></div><div  class="xml_table_env" id="id_68"><a name="table.5.2"></a><table border="0" class="xml_table" cellpadding="2" cellspacing="1"><caption>
+                    Таблица 5.2.
+                    </caption><tr><th bgcolor="#d8d8d8">Время</th><th bgcolor="#d8d8d8">Студент 1</th><th bgcolor="#d8d8d8">Студент 2</th><th bgcolor="#d8d8d8">Студент 3</th></tr><tr><td bgcolor="#eaeaea" valign="top">17-05</td><td bgcolor="#eaeaea" valign="top">Приходит в комнату</td><td bgcolor="#eaeaea" valign="top"></td><td bgcolor="#eaeaea" valign="top"></td></tr><tr><td bgcolor="#eaeaea" valign="top">17-07</td><td bgcolor="#eaeaea" valign="top">Достает два батона хлеба</td><td bgcolor="#eaeaea" valign="top"></td><td bgcolor="#eaeaea" valign="top"></td></tr><tr><td bgcolor="#eaeaea" valign="top">17-43</td><td bgcolor="#eaeaea" valign="top"></td><td bgcolor="#eaeaea" valign="top">Приходит в комнату</td><td bgcolor="#eaeaea" valign="top"></td></tr><tr><td bgcolor="#eaeaea" valign="top">17-47</td><td bgcolor="#eaeaea" valign="top"></td><td bgcolor="#eaeaea" valign="top"></td><td bgcolor="#eaeaea" valign="top">Приходит в комнату</td></tr></table></div><div  class="lecture_mark" id="mark_68"></div><p  id="id_69">Итак, для решения задачи необходимо, чтобы в том случае, когда 
+   процесс находится в своем <span class="keyword">критическом участке</span>, другие процессы не 
+   могли войти в свои <span class="keyword">критические участки</span>. Мы видим, что <span class="keyword">критический 
+   участок</span> должен сопровождаться прологом (<span class="texample">entry section</span>) – "закрыть 
+   дверь изнутри на засов" – и эпилогом (<span class="texample">exit section</span>) – "отодвинуть 
+   засов", которые не имеют отношения к <span class="keyword">активности</span> одиночного процесса. 
+   Во время выполнения пролога процесс должен, в частности, получить 
+   разрешение на вход в <span class="keyword">критический участок</span>, а во время выполнения 
+   эпилога – сообщить другим процессам, что он покинул <span class="keyword">критическую секцию</span>.</p><div  class="lecture_mark" id="mark_69"></div><p  id="id_72">В общем случае структура процесса, участвующего во взаимодействии, 
+   может быть представлена следующим образом: </p><div  class="lecture_mark" id="mark_72"></div><div  class="example"><pre>
+while (some condition) {
+   entry section
+      critical section
+   exit section
+      remainder section
+} 
+</pre></div><p  id="id_74">Здесь под <span class="texample">remainder section</span> понимаются все <span class="keyword">атомарные 
+   операции</span>, не входящие в <span class="keyword">критическую секцию</span>. </p><div  class="lecture_mark" id="mark_74"></div><p  id="id_76">Оставшаяся часть этой лекции посвящена различным способам 
+   программной организации пролога и эпилога <span class="keyword">критического участка</span> 
+   в случае, когда очередность доступа к <span class="keyword">критическому участку</span> не 
+   имеет значения.</p><div  class="lecture_mark" id="mark_76"></div><h3 >Программные алгоритмы организации взаимодействия процессов</h3><h4 >Требования, предъявляемые к алгоритмам</h4><p  id="id_77">Организация <span class="keyword">взаимоисключения</span> для <span class="keyword">критических участков</span>, конечно, 
+      позволит избежать возникновения race condition, но не является 
+      достаточной для правильной и эффективной параллельной работы 
+      кооперативных процессов. Сформулируем пять условий, которые должны 
+      выполняться для хорошего программного алгоритма организации 
+      взаимодействия процессов, имеющих <span class="keyword">критические участки</span>, если 
+      они могут проходить их в произвольном порядке.</p><div  class="lecture_mark" id="mark_77"></div><ol  id="id_78"><li>Задача должна быть решена чисто программным способом на 
+         обычной машине, не имеющей специальных команд <span class="keyword">взаимоисключения</span>. 
+         При этом предполагается, что основные инструкции языка программирования 
+         (такие примитивные инструкции, как <span class="texample">load</span>, <span class="texample">store</span>, <span class="texample">test</span>) являются 
+         <span class="keyword">атомарными операциями</span>.</li><li>Не должно существовать никаких предположений об относительных 
+         скоростях выполняющихся процессов или числе процессоров, на которых 
+         они исполняются.</li><li>Если процесс <span class="texample">P<sub>i</sub></span> исполняется в своем <span class="keyword">критическом участке</span>, 
+         то не существует никаких других процессов, которые исполняются в 
+         соответствующих <span class="keyword">критических секциях</span>. Это условие получило название 
+         условия <span class="keyword">взаимоисключения (mutual exclusion)</span>. </li><li><a name="keyword-context.6"></a>Процессы, которые находятся вне своих <span class="keyword">критических участков</span> 
+         и не собираются входить в них, не могут препятствовать другим 
+         процессам входить в их собственные <span class="keyword">критические участки</span>. Если 
+         нет процессов в <span class="keyword">критических секциях</span> и имеются процессы, желающие 
+         войти в них, то только те процессы, которые не исполняются в 
+         remainder section, должны принимать решение о том, какой процесс 
+         войдет в свою <span class="keyword">критическую секцию</span>. Такое решение не должно 
+         приниматься бесконечно долго. Это условие получило название 
+         <span class="keyword_def">условия прогресса (progress)</span>. </li><li><a name="keyword-context.7"></a>Не должно возникать неограниченно долгого ожидания для входа 
+         одного из процессов в свой <span class="keyword">критический участок</span>. От того момента, 
+         когда процесс запросил разрешение на вход в <span class="keyword">критическую секцию</span>, 
+         и до того момента, когда он это разрешение получил, другие 
+         процессы могут пройти через свои <span class="keyword">критические участки</span> лишь 
+         ограниченное число раз. Это условие получило название <span class="keyword_def">условия 
+         ограниченного ожидания (bound waiting)</span>. </li></ol><div  class="lecture_mark" id="mark_78"></div><p  id="id_88">Надо заметить, что описание соответствующего алгоритма в нашем 
+      случае означает описание способа организации пролога и эпилога для 
+      <span class="keyword">критической секции</span>. </p><div  class="lecture_mark" id="mark_88"></div><h4 >Запрет прерываний</h4><p  id="id_89">Наиболее простым решением поставленной задачи является следующая 
+      организация пролога и эпилога:</p><div  class="lecture_mark" id="mark_89"></div><div  class="example"><pre>
+while (some condition) { 
+   запретить все прерывания 
+      critical section 
+   разрешить все прерывания 
+      remainder section 
+} 
+</pre></div><p  id="id_91">Поскольку выход процесса из состояния <b>исполнение</b> без его завершения 
+      осуществляется по прерыванию, внутри <span class="keyword">критической секции</span> никто не может 
+      вмешаться в его работу. Однако такое решение может иметь далеко идущие 
+      последствия, поскольку позволяет процессу пользователя разрешать и 
+      запрещать прерывания во всей вычислительной системе. Допустим, что 
+      пользователь случайно или по злому умыслу запретил прерывания в 
+      системе и зациклил или завершил свой процесс. Без перезагрузки 
+      системы в такой ситуации не обойтись.</p><div  class="lecture_mark" id="mark_91"></div><p  id="id_92">Тем не менее запрет и разрешение прерываний часто применяются как 
+      пролог и эпилог к <span class="keyword">критическим секциям</span> внутри самой операционной системы, 
+      например при обновлении содержимого PCB.</p><div  class="lecture_mark" id="mark_92"></div><h4 >Переменная-замок</h4><p  id="id_93">В качестве следующей попытки решения задачи для пользовательских 
+      процессов рассмотрим другое предложение. Возьмем некоторую переменную, 
+      доступную всем процессам, с начальным значением равным <span class="texample">0</span>. Процесс может 
+      войти в <span class="keyword">критическую секцию</span> только тогда, когда значение этой 
+      переменной-замка равно <span class="texample">0</span>, одновременно изменяя ее значение на <span class="texample">1</span> – закрывая 
+      замок. При выходе из <span class="keyword">критической секции</span> процесс сбрасывает ее значение 
+      в <span class="texample">0</span> – замок открывается (как в случае с покупкой хлеба студентами в 
+      разделе "<span class="keyword">Критическая секция</span>").</p><div  class="lecture_mark" id="mark_93"></div><div  class="example"><pre>
+shared int lock = 0; 
+/* shared означает, что */
+/* переменная является разделяемой */
+
+while (some condition) {
+   while(lock); lock = 1;
+      critical section
+   lock = 0;
+      remainder section
+}
+</pre></div><p  id="id_99">К сожалению, при внимательном рассмотрении мы видим, что 
+      такое решение не удовлетворяет условию <span class="keyword">взаимоисключения</span>, так 
+      как действие <span class="texample">while(lock); lock = 1;</span> не является атомарным. 
+      Допустим, процесс <span class="texample">P<sub>0</sub></span> протестировал значение переменной <span class="texample">lock</span> 
+      и принял решение двигаться дальше. В этот момент, еще до 
+      присвоения переменной <span class="texample">lock</span> значения <span class="texample">1</span>, планировщик передал 
+      управление процессу <span class="texample">P<sub>1</sub></span>. Он тоже изучает содержимое переменной 
+      <span class="texample">lock</span> и тоже принимает решение войти в <span class="keyword">критический участок</span>. 
+      Мы получаем два процесса, одновременно выполняющих свои <span class="keyword">критические секции</span>.</p><div  class="lecture_mark" id="mark_99"></div><h4 >Строгое чередование</h4><p  id="id_107">Попробуем решить задачу сначала для двух процессов. Очередной 
+      подход будет также использовать общую для них обоих переменную с 
+      начальным значением <span class="texample">0</span>. Только теперь она будет играть не роль замка 
+      для <span class="keyword">критического участка</span>, а явно указывать, кто может следующим войти 
+      в него. Для i-го процесса это выглядит так:</p><div  class="lecture_mark" id="mark_107"></div><div  class="example"><pre>
+shared int turn = 0; 
+
+while (some condition) { 
+   while(turn != i); 
+      critical section 
+   turn = 1-i; 
+      remainder section 
+} 
+</pre></div><p  id="id_110">Очевидно, что <span class="keyword">взаимоисключение</span> гарантируется, процессы 
+      входят в <span class="keyword">критическую секцию</span> строго по очереди: <span class="texample">P<sub>0</sub></span>, <span class="texample">P<sub>1</sub></span>, 
+      <span class="texample">P<sub>0</sub></span>, <span class="texample">P<sub>1</sub></span>, <span class="texample">P<sub>0</sub></span>, ... 
+      Но наш алгоритм не удовлетворяет <span class="keyword">условию прогресса</span>. Например, 
+      если значение <span class="texample">turn</span> равно <span class="texample">1</span>, и процесс <span class="texample">P<sub>0</sub></span> готов войти в <span class="keyword">критический 
+      участок</span>, он не может сделать этого, даже если процесс <span class="texample">P<sub>1</sub></span> находится 
+      в <b>remainder section</b>.</p><div  class="lecture_mark" id="mark_110"></div><h4 >Флаги готовности</h4><p  id="id_120">Недостаток предыдущего алгоритма заключается в том, что процессы 
+      ничего не знают о состоянии друг друга в текущий момент времени. 
+      Давайте попробуем исправить эту ситуацию. Пусть два наших процесса 
+      имеют разделяемый массив флагов готовности входа процессов в 
+      <span class="keyword">критический участок</span></p><div  class="lecture_mark" id="mark_120"></div><div  class="example"><pre>
+shared int ready[2] = {0, 0}; 
+</pre></div><p  id="id_122">Когда i-й процесс готов войти в <span class="keyword">критическую секцию</span>, он 
+      присваивает элементу массива <span class="texample">ready[i]</span> значение равное <span class="texample">1</span>. 
+      После выхода из <span class="keyword">критической секции</span> он, естественно, сбрасывает 
+      это значение в <span class="texample">0</span>. Процесс не входит в <span class="keyword">критическую секцию</span>, если 
+      другой процесс уже готов к входу в <span class="keyword">критическую секцию</span> или 
+      находится в ней.</p><div  class="lecture_mark" id="mark_122"></div><div  class="example"><pre>
+while (some condition) { 
+   ready[i] = 1; 
+   while(ready[1-i]); 
+      critical section 
+   ready[i] = 0; 
+      remainder section 
+} 
+</pre></div><p  id="id_127">Полученный алгоритм обеспечивает <span class="keyword">взаимоисключение</span>, позволяет 
+      процессу, готовому к входу в <span class="keyword">критический участок</span>, войти в него 
+      сразу после завершения эпилога в другом процессе, но все равно 
+      нарушает <span class="keyword">условие прогресса</span>. Пусть процессы практически одновременно 
+      подошли к выполнению пролога. После выполнения присваивания 
+      <span class="texample">ready[0]=1</span> планировщик передал процессор от процесса <span class="texample">0</span> процессу <span class="texample">1</span>, 
+      который также выполнил присваивание <span class="texample">ready[1]=1</span>. После этого оба 
+      процесса бесконечно долго ждут друг друга на входе в <span class="keyword">критическую 
+      секцию</span>. Возникает ситуация, которую принято называть тупиковой 
+      (deadlock). (Подробнее о тупиковых ситуациях рассказывается в лекции 7.)</p><div  class="lecture_mark" id="mark_127"></div><h4 >Алгоритм Петерсона</h4><p  id="id_132">Первое решение проблемы, удовлетворяющее всем требованиям и 
+      использующее идеи ранее рассмотренных алгоритмов, было предложено 
+      датским математиком Деккером (Dekker). В 1981 году Петерсон (Peterson) 
+      предложил более изящное решение. Пусть оба процесса имеют доступ к 
+      массиву флагов готовности и к переменной очередности. </p><div  class="lecture_mark" id="mark_132"></div><div  class="example"><pre>
+shared int ready[2] = {0, 0}; 
+shared int turn; 
+while (some condition) { 
+   ready[i] = 1; 
+   turn =1-i; 
+   while(ready[1-i] &amp;&amp; turn == 1-i);
+      critical section 
+   ready[i] = 0; 
+      remainder section 
+} 
+</pre></div><p  id="id_134">При исполнении пролога <span class="keyword">критической секции</span> процесс <span class="texample">P<sub>i</sub></span> заявляет 
+      о своей готовности выполнить <span class="keyword">критический участок</span> и одновременно 
+      предлагает другому процессу приступить к его выполнению. Если оба 
+      процесса подошли к прологу практически одновременно, то они оба 
+      объявят о своей готовности и предложат выполняться друг другу. 
+      При этом одно из предложений всегда следует после другого. Тем 
+      самым работу в <span class="keyword">критическом участке</span> продолжит процесс, которому 
+      было сделано последнее предложение.</p><div  class="lecture_mark" id="mark_134"></div><p  id="id_136">Давайте докажем, что все пять наших требований к алгоритму 
+      действительно удовлетворяются. </p><div  class="lecture_mark" id="mark_136"></div><p  id="id_137">Удовлетворение требований 1 и 2 очевидно. </p><div  class="lecture_mark" id="mark_137"></div><p  id="id_138">Докажем выполнение условия <span class="keyword">взаимоисключения</span> методом от 
+      противного. Пусть оба процесса одновременно оказались внутри 
+      своих <span class="keyword">критических секций</span>. Заметим, что процесс <span class="texample">P<sub>i</sub></span> может войти 
+      в <span class="keyword">критическую секцию</span>, только если <span class="texample">ready[1-i] == 0</span> или <span class="texample">turn == i</span>. 
+      Заметим также, что если оба процесса выполняют свои <span class="keyword">критические 
+      секции</span> одновременно, то значения флагов готовности для обоих 
+      процессов совпадают и равны <span class="texample">1</span>. Могли ли оба процесса войти в 
+      <span class="keyword">критические секции</span> из состояния, когда они оба одновременно 
+      находились в процессе выполнения цикла <span class="texample">while</span>? Нет, так как в 
+      этом случае переменная <span class="texample">turn</span> должна была бы одновременно иметь 
+      значения <span class="texample">0</span> и <span class="texample">1</span> (когда оба процесса выполняют цикл, значения 
+      переменных измениться не могут). Пусть процесс <span class="texample">P<sub>0</sub></span> первым вошел 
+      в <span class="keyword">критический участок</span>, тогда процесс <span class="texample">P<sub>1</sub></span> должен был выполнить 
+      перед вхождением в цикл <span class="texample">while</span> по крайней мере один предваряющий 
+      оператор <span class="texample">(turn = 0;)</span>. Однако после этого он не может выйти из 
+      цикла до окончания <span class="keyword">критического участка</span> процесса <span class="texample">P<sub>0</sub></span>, так как при 
+      входе в цикл <span class="texample">ready[0] == 1</span> и <span class="texample">turn == 0</span>, и эти значения не могут 
+      измениться до тех пор, пока процесс <span class="texample">P<sub>0</sub></span> не покинет свой <span class="keyword">критический 
+      участок</span>. Мы пришли к противоречию. Следовательно, имеет место 
+      <span class="keyword">взаимоисключение</span>.</p><div  class="lecture_mark" id="mark_138"></div><p  id="id_155">Докажем выполнение <span class="keyword">условия прогресса</span>. Возьмем, без ограничения 
+      общности, процесс <span class="texample">P<sub>0</sub></span>. Заметим, что он не может войти в свою 
+      <span class="keyword">критическую секцию</span> только при совместном выполнении условий 
+      <span class="texample">ready[1] == 1</span> и <span class="texample">turn == 1</span>. Если процесс <span class="texample">P<sub>1</sub></span> не готов к выполнению 
+      <span class="keyword">критического участка</span>, то <span class="texample">ready[1] == 0</span>, и процесс <span class="texample">P<sub>0</sub></span> может 
+      осуществить вход. Если процесс <span class="texample">P<sub>1</sub></span> готов к выполнению <span class="keyword">критического 
+      участка</span>, то <span class="texample">ready[1] == 1</span> и переменная <span class="texample">turn</span> имеет значение <span class="texample">0</span> либо <span class="texample">1</span>, 
+      позволяя процессу <span class="texample">P<sub>0</sub></span> либо процессу <span class="texample">P<sub>1</sub></span> начать выполнение <span class="keyword">критической 
+      секции</span>. Если процесс <span class="texample">P<sub>1</sub></span> завершил выполнение <span class="keyword">критического участка</span>, 
+      то он сбросит свой флаг готовности <span class="texample">ready[1] == 0</span>, разрешая 
+      процессу <span class="texample">P<sub>0</sub></span> приступить к выполнению критической работы. Таким 
+      образом, <span class="keyword">условие прогресса</span> выполняется.</p><div  class="lecture_mark" id="mark_155"></div><p  id="id_172">Отсюда же вытекает выполнение <span class="keyword">условия ограниченного ожидания</span>. Так как в 
+      процессе ожидания разрешения на вход процесс <span class="texample">P<sub>0</sub></span> не изменяет значения 
+      переменных, он сможет начать исполнение своего <span class="keyword">критического участка</span> 
+      после не более чем одного прохода по <span class="keyword">критической секции</span> процесса <span class="texample">P<sub>1</sub></span>.</p><div  class="lecture_mark" id="mark_172"></div><h4 >Алгоритм булочной (Bakery algorithm)</h4><p  id="id_175"><span class="keyword">Алгоритм Петерсона</span> дает нам решение задачи корректной 
+   организации взаимодействия двух процессов. Давайте рассмотрим 
+   теперь соответствующий алгоритм для n взаимодействующих 
+   процессов, который получил название <span class="keyword">алгоритм булочной</span>, 
+   хотя применительно к нашим условиям его следовало бы скорее 
+   назвать алгоритм регистратуры в поликлинике. Основная его 
+   идея выглядит так. Каждый вновь прибывающий клиент (он же 
+   процесс) получает талончик на обслуживание с номером. Клиент 
+   с наименьшим номером на талончике обслуживается следующим. 
+   К сожалению, из-за неатомарности операции вычисления следующего 
+   номера <span class="keyword">алгоритм булочной</span> не гарантирует, что у всех процессов 
+   будут талончики с разными номерами. В случае равенства номеров 
+   на талончиках у двух или более клиентов первым обслуживается 
+   клиент с меньшим значением имени (имена можно сравнивать в 
+   лексикографическом порядке). Разделяемые структуры данных для 
+   алгоритма – это два массива</p><div  class="lecture_mark" id="mark_175"></div><div  class="example"><pre>
+shared enum {false, true} choosing[n];
+shared int number[n]; 
+</pre></div><p  id="id_177">Изначально элементы этих массивов инициируются значениями 
+   <span class="texample">false</span> и <span class="texample">0</span> соответственно. Введем следующие обозначения</p><div  class="lecture_mark" id="mark_177"></div><div  class="example"><pre>
+(a,b) &lt; (c,d), если a &lt; c 
+или если a == c и b &lt; d 
+max(a<sub>0</sub>, a<sub>1</sub>, ...., a<sub>n</sub>) – это число k такое, что 
+k &gt;= a<sub>i</sub> для всех i = 0, ...,n
+</pre></div><p  id="id_181">Структура процесса <span class="texample">P<sub>i</sub></span> для <span class="keyword">алгоритма булочной</span> приведена ниже</p><div  class="lecture_mark" id="mark_181"></div><div  class="example"><pre>
+while (some condition) { 
+   choosing[i] = true; 
+   number[i] = max(number[0], ..., 
+                   number[n-1]) + 1;
+   choosing[i] = false; 
+   for(j = 0; j &lt; n; j++){ 
+      while(choosing[j]); 
+      while(number[j] != 0 &amp;&amp; (number[j],j) &lt; 
+         (number[i],i)); 
+   } 
+      critical section 
+   number[i] = 0; 
+      remainder section 
+} 
+</pre></div><p  id="id_184">Доказательство того, что этот алгоритм удовлетворяет условиям 
+   1 – 5, выполните самостоятельно в качестве упражнения.</p><div  class="lecture_mark" id="mark_184"></div><h4 >Аппаратная поддержка взаимоисключений</h4><p  id="id_185">Наличие аппаратной поддержки <span class="keyword">взаимоисключений</span> позволяет 
+   упростить алгоритмы и повысить их эффективность точно так же, 
+   как это происходит и в других областях программирования. Мы 
+   уже обращались к общепринятому hardware для решения задачи 
+   реализации <span class="keyword">взаимоисключений</span>, когда говорили об использовании 
+   механизма запрета/разрешения прерываний. </p><div  class="lecture_mark" id="mark_185"></div><p  id="id_186">Многие вычислительные системы помимо этого имеют специальные 
+   команды процессора, которые позволяют проверить и изменить 
+   значение машинного слова или поменять местами значения двух 
+   машинных слов в памяти, выполняя эти действия как <span class="keyword">атомарные 
+   операции</span>. Давайте обсудим, как концепции таких команд могут 
+   использоваться для реализации <span class="keyword">взаимоисключений</span>.</p><div  class="lecture_mark" id="mark_186"></div><h4 >Команда Test-and-Set (проверить и присвоить 1)</h4><p  id="id_187">О выполнении команды <span class="texample"><span class="keyword">Test-and-Set</span></span>, осуществляющей проверку 
+      значения логической переменной с одновременной установкой ее 
+      значения в <span class="texample">1</span>, можно думать как о выполнении функции</p><div  class="lecture_mark" id="mark_187"></div><div  class="example"><pre>
+int Test_and_Set (int *target){ 
+   int tmp = *target; 
+   *target = 1; 
+   return tmp; 
+} 
+</pre></div><p  id="id_191">С использованием этой атомарной команды мы можем 
+      модифицировать наш алгоритм для переменной-замка, так 
+      чтобы он обеспечивал <span class="keyword">взаимоисключения</span> </p><div  class="lecture_mark" id="mark_191"></div><div  class="example"><pre>
+shared int lock = 0; 
+
+while (some condition) { 
+   while(Test_and_Set(&amp;lock)); 
+      critical section 
+   lock = 0; 
+      remainder section 
+} 
+</pre></div><p  id="id_193">К сожалению, даже в таком виде полученный алгоритм не 
+      удовлетворяет <span class="keyword">условию ограниченного ожидания</span> для алгоритмов. 
+      Подумайте, как его следует изменить для соблюдения всех условий.</p><div  class="lecture_mark" id="mark_193"></div><h4 >Команда Swap (обменять значения)</h4><p  id="id_194">Выполнение команды <span class="texample"><span class="keyword">Swap</span></span>, обменивающей два значения, 
+      находящихся в памяти, можно проиллюстрировать следующей функцией:</p><div  class="lecture_mark" id="mark_194"></div><div  class="example"><pre>
+void Swap (int *a, int *b){ 
+   int tmp = *a; 
+   *a = *b; 
+   *b = tmp; 
+} 
+</pre></div><p  id="id_197">Применяя атомарную команду <span class="texample"><span class="keyword">Swap</span></span>, мы можем реализовать 
+      предыдущий алгоритм, введя дополнительную логическую переменную <span class="texample">key</span>, 
+      локальную для каждого процесса:</p><div  class="lecture_mark" id="mark_197"></div><div  class="example"><pre>
+shared int lock = 0; 
+int key; 
+
+while (some condition) { 
+   key = 1; 
+   do Swap(&amp;lock,&amp;key); 
+   while (key); 
+      critical section 
+   lock = 0; 
+      remainder section 
+} 
+</pre></div><h3 >Заключение</h3><p  id="id_201">Последовательное выполнение некоторых действий, направленных 
+   на достижение определенной цели, называется <span class="keyword">активностью</span>. <span class="keyword">Активности</span> 
+   состоят из <span class="keyword">атомарных операций</span>, выполняемых неразрывно, как единичное 
+   целое. <a name="keyword-context.8"></a>При исполнении нескольких <span class="keyword">активностей</span> в псевдопараллельном 
+   режиме <span class="keyword">атомарные операции</span> различных <span class="keyword">активностей</span> могут перемешиваться 
+   между собой с соблюдением порядка следования внутри <span class="keyword">активностей</span>. 
+   Это явление получило название <span class="keyword">interleaving (чередование)</span>. Если 
+   результаты выполнения нескольких <span class="keyword">активностей</span> не зависят от варианта 
+   чередования, то такой <span class="keyword">набор</span> <span class="keyword">активностей</span> называется детерминированным. 
+   В противном случае он носит название <span class="keyword">недетерминированного</span>. Существует 
+   достаточное <span class="keyword">условие Бернстайна</span> для определения детерминированности 
+   набора <span class="keyword">активностей</span>, но оно накладывает очень жесткие ограничения на 
+   набор, требуя практически не взаимодействующих <span class="keyword">активностей</span>. Про 
+   <span class="keyword">недетерминированный набор</span> <span class="keyword">активностей</span> говорят, что он имеет race 
+   condition (условие гонки, состязания). Устранение race condition 
+   возможно при ограничении допустимых вариантов чередований <span class="keyword">атомарных 
+   операций</span> с помощью синхронизации поведения <span class="keyword">активностей</span>. Участки 
+   <span class="keyword">активностей</span>, выполнение которых может привести к race condition, 
+   называют <span class="keyword_def">критическими участками</span>. Необходимым условием для устранения 
+   race condition является организация <span class="keyword">взаимоисключения</span> на <span class="keyword">критических 
+   участках</span>: внутри соответствующих <span class="keyword">критических участков</span> не может 
+   одновременно находиться более одной <span class="keyword">активности</span>.</p><div  class="lecture_mark" id="mark_201"></div><p  id="id_202">Для эффективных программных алгоритмов устранения race condition 
+   помимо условия <span class="keyword">взаимоисключения</span> требуется выполнение следующих условий: 
+   алгоритмы не используют специальных команд процессора для организации 
+   <span class="keyword">взаимоисключений</span>, алгоритмы ничего не знают о скоростях выполнения 
+   процессов, алгоритмы удовлетворяют <span class="keyword">условиям прогресса</span> и <span class="keyword">ограниченного 
+   ожидания</span>. Все эти условия выполняются в <span class="keyword">алгоритме Петерсона</span> для двух 
+   процессов и <span class="keyword">алгоритме булочной</span> – для нескольких процессов.</p><div  class="lecture_mark" id="mark_202"></div><p  id="id_203">Применение специальных команд процессора, выполняющих ряд действий 
+   как <span class="keyword">атомарную операцию</span>, – <span class="texample"><span class="keyword">Test-and-Set</span></span>, <span class="texample"><span class="keyword">Swap</span></span> – 
+   позволяет существенно упростить алгоритмы синхронизации процессов.</p><div  class="lecture_mark" id="mark_203"></div>
+
+
+	</td>
+	</tr>
+	<tr><td height="8"><img src="5. Алгоритмы синхронизации_files/empty000.gif" width="1" height="8"></td></tr>
+	</table>
+	<!-- /content -->
+
+</td>
+<td><img src="5. Алгоритмы синхронизации_files/empty000.gif" width="8" height="1"></td>
+</tr>
+</table>
+<!-- /bottom -->
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr><td class="orang" height="1"><img src="5. Алгоритмы синхронизации_files/empty000.gif" width="1" height="1"></td></tr>
+<td class="ltxt" align=center>&copy; INTUIT.ru, 2003-2008. Все права защищены.</td>
+</tr>
+</table>
+<!-- /bottom -->
+
+<script src="5. Алгоритмы синхронизации_files/urchin00.js" type="text/javascript">
+</script>
+<script type="text/javascript">
+_uacct = "UA-3475067-1";
+urchinTracker();
+</script></body>
+</html>
+
+
+<!-- This document saved from http://www.intuit.ru/department/os/osintro/5/osintro_5.html -->

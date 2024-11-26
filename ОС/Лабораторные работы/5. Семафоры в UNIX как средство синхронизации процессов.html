@@ -1,0 +1,290 @@
+
+<!-- saved from url=(0075)http://www.intuit.ru/department/os/osintropractice/5/osintropractice_5.html -->
+<HTML><HEAD><META http-equiv="Content-Type" content="text/html; charset=windows-1251">
+
+<TITLE>INTUIT.ru::Интернет-Университет Информационных Технологий</TITLE>
+<LINK href="./5. Семафоры в UNIX как средство синхронизации процессов_files/printable.css" type="text/css" rel="stylesheet">
+</HEAD><BODY leftmargin="6" topmargin="6" marginheight="6" marginwidth="6">
+
+<DIV align="left">
+<SPAN style="color: #000000; font-weight: bold;">
+&nbsp;&nbsp;
+<SPAN style="font-size:12pt;">Интернет-Университет Информационных Технологий</SPAN>
+</SPAN>
+</DIV>
+
+&nbsp;&nbsp;
+<SPAN align="rright" style="color: #330066; text-decoration:underline;">http://www.INTUIT.ru</SPAN>
+
+
+<TABLE border="0" cellpadding="0" cellspacing="0" width="100%">
+<TBODY><TR><TD height="8" colspan="3"><IMG src="./5. Семафоры в UNIX как средство синхронизации процессов_files/empty.gif" width="1" height="8"></TD></TR>
+<TR><TD class="orang" height="1" colspan="3"><IMG src="./5. Семафоры в UNIX как средство синхронизации процессов_files/empty.gif" width="1" height="1"></TD></TR>
+<TR><TD height="8" colspan="3"><IMG src="./5. Семафоры в UNIX как средство синхронизации процессов_files/empty.gif" width="1" height="8"></TD></TR>
+<TR valign="top">
+<TD><IMG src="./5. Семафоры в UNIX как средство синхронизации процессов_files/empty.gif" width="8" height="1"></TD>
+<TD>
+	<!-- content -->
+	<TABLE border="0" cellpadding="0" cellspacing="0" width="100%">
+	<TBODY><TR><TD class="head">Основы операционных систем. Практикум</TD></TR>
+<TR><TD height="4"><IMG src="./5. Семафоры в UNIX как средство синхронизации процессов_files/empty.gif" width="1" height="4"></TD></TR>
+	<TR><TD class="orang" height="1"><IMG src="./5. Семафоры в UNIX как средство синхронизации процессов_files/empty.gif" width="1" height="1"></TD></TR>
+	<TR><TD height="8"><IMG src="./5. Семафоры в UNIX как средство синхронизации процессов_files/empty.gif" width="1" height="8"></TD></TR>
+	<TR><TD><SPAN class="headsub">
+
+
+5. Лекция:
+
+ Семафоры в UNIX как средство синхронизации процессов: версия для печати и PDA</SPAN>
+
+<BR>
+<SPAN class="rtxt">Семафоры в UNIX. Отличие операций над UNIX-семафорами от классических операций. Создание массива семафоров или доступ к уже существующему массиву. Системный вызов semget(). Выполнение операций над семафорами. Системный вызов semop(). Удаление набора семафоров из системы с помощью команды ipcrm или системного вызова semctl(). Понятие о POSIX-семафорах. 
+</SPAN>
+
+</TD></TR>
+
+	<TR><TD height="8"><IMG src="./5. Семафоры в UNIX как средство синхронизации процессов_files/empty.gif" width="1" height="8"></TD></TR>
+	<TR><TD class="orang" height="1"><IMG src="./5. Семафоры в UNIX как средство синхронизации процессов_files/empty.gif" width="1" height="1"></TD></TR>
+	<TR><TD height="8"><IMG src="./5. Семафоры в UNIX как средство синхронизации процессов_files/empty.gif" width="1" height="8"></TD></TR>
+	<TR><TD>
+
+
+<A name="sect1"></A><H3>Семафоры в UNIX. Отличие операций над UNIX-семафорами от классических операций</H3><P id="id_1">В материалах предыдущего семинара речь шла о необходимости синхронизации работы процессов для их корректного взаимодействия через разделяемую память. Как упоминалось в лекции 6, одним из первых механизмов, предложенных для синхронизации поведения процессов, стали семафоры, концепцию которых описал Дейкстра (Dijkstra) в 1965 году. При разработке средств <SPAN class="keyword">System V IPC</SPAN> семафоры вошли в их состав как неотъемлемая часть. Следует отметить, что набор операций над <SPAN class="keyword">семафорами System V IPC</SPAN> отличается от классического набора операций <SPAN class="texample">{P, V}</SPAN>, предложенного Дейкстрой. Он включает три операции: </P><DIV class="lecture_mark" id="mark_1"></DIV><UL id="id_3"><LI><A name="keyword-context.1"></A><SPAN class="texample"><SPAN class="keyword_def">A(S, n)</SPAN></SPAN> – увеличить значение семафора <SPAN class="texample">S</SPAN> на величину <SPAN class="texample">n</SPAN>; </LI><LI><A name="keyword-context.2"></A><SPAN class="texample"><SPAN class="keyword_def">D(S, n)</SPAN></SPAN> – пока значение семафора <SPAN class="texample">S &lt; n</SPAN>, процесс блокируется. Далее 	<SPAN class="texample">S = S - n;</SPAN> </LI><LI><A name="keyword-context.3"></A><SPAN class="texample"><SPAN class="keyword_def">Z(S)</SPAN></SPAN> – процесс блокируется до тех пор, пока значение семафора <SPAN class="texample">S</SPAN> не станет равным <SPAN class="texample">0</SPAN>. </LI></UL><DIV class="lecture_mark" id="mark_3"></DIV><P id="id_16">Изначально все IPC-семафоры инициируются нулевым значением.</P><DIV class="lecture_mark" id="mark_16"></DIV><P id="id_17">Мы видим, что классической операции <SPAN class="texample">P(S)</SPAN> соответствует операция <SPAN class="texample"><SPAN class="keyword">D(S,1)</SPAN></SPAN>, а классической операции <SPAN class="texample">V(S)</SPAN> соответствует операция <SPAN class="texample"><SPAN class="keyword">A(S,1)</SPAN></SPAN>. Аналогом ненулевой инициализации семафоров Дейкстры значением n может служить выполнение операции <SPAN class="texample"><SPAN class="keyword">A(S,n)</SPAN></SPAN> сразу после создания семафора <SPAN class="texample">S</SPAN>, с обеспечением атомарности создания семафора и ее выполнения посредством другого семафора. Мы показали, что классические семафоры реализуются через <SPAN class="keyword">семафоры System V IPC</SPAN>. Обратное не является верным. Используя операции <SPAN class="texample">P(S)</SPAN> и <SPAN class="texample">V(S)</SPAN>, мы не сумеем реализовать операцию <SPAN class="texample"><SPAN class="keyword">Z(S)</SPAN></SPAN>.</P><DIV class="lecture_mark" id="mark_17"></DIV><P id="id_27">Поскольку IPC-семафоры являются составной частью средств <SPAN class="keyword">System V IPC</SPAN>, то для них верно все, что говорилось об этих средствах в материалах предыдущего семинара. IPC-семафоры являются средством связи с непрямой адресацией, требуют инициализации для организации взаимодействия процессов и специальных действий для освобождения системных ресурсов по его окончании. Пространством имен IPC-семафоров является множество значений ключа, генерируемых с помощью функции <SPAN class="texample">ftok()</SPAN>. Для совершения операций над семафорами системным вызовам в качестве параметра передаются IPC- дескрипторы семафоров, однозначно идентифицирующих их во всей вычислительной системе, а вся информация о семафорах располагается в адресном пространстве ядра операционной системы. Это позволяет организовывать через семафоры взаимодействие процессов, даже не находящихся в системе одновременно.</P><DIV class="lecture_mark" id="mark_27"></DIV><A name="sect2"></A><H3>Создание массива семафоров или доступ к уже существующему. Системный вызов semget() </H3><P id="id_29">В целях экономии системных ресурсов операционная система UNIX позволяет создавать не по одному семафору для каждого конкретного значения ключа, а связывать с ключом целый <SPAN class="keyword">массив семафоров</SPAN> (в Linux – до 500 семафоров в <SPAN class="keyword">массиве</SPAN>, хотя это количество может быть уменьшено системным администратором). <A name="keyword-context.4"></A>Для создания <SPAN class="keyword">массива семафоров</SPAN>, ассоциированного с определенным ключом, или доступа по ключу к уже существующему <SPAN class="keyword">массиву</SPAN> используется системный вызов <SPAN class="texample"><SPAN class="keyword_def">semget()</SPAN></SPAN>, являющийся аналогом системного вызова <SPAN class="texample">shmget()</SPAN> для разделяемой памяти, который возвращает значение IPC-дескриптора для этого <SPAN class="keyword">массива</SPAN>. При этом применяются те же способы создания и доступа (см. семинары 6-7 раздел "Разделяемая память в UNIX. Системные вызовы 
+<SPAN class="texample">shmget()</SPAN>, <SPAN class="texample">shmat()</SPAN>, <SPAN class="texample">shmdt()</SPAN>"), что и для разделяемой памяти. Вновь созданные семафоры инициируются нулевым значением. </P><DIV class="lecture_mark" id="mark_29"></DIV><DIV class="xml_table_env" id="id_35"><A name=""></A><TABLE border="0" class="xml_table" cellpadding="2" cellspacing="1"><TBODY><TR><TD bgcolor="#eaeaea" valign="top">
+
+<P id="id_36"><B>Системный вызов semget()</B></P><DIV class="lecture_mark" id="mark_36"></DIV>
+
+<P id="id_37"><B>Прототип системного вызова</B></P><DIV class="lecture_mark" id="mark_37"></DIV>
+
+<DIV class="example"><PRE>#include &lt;sys/types.h&gt;
+#include &lt;sys/ipc.h&gt;
+#include &lt;sys/sem.h&gt;
+
+int semget(key_t key, int nsems, 
+           int semflg);
+</PRE></DIV>
+
+<P id="id_39"><B>Описание системного вызова</B></P><DIV class="lecture_mark" id="mark_39"></DIV>
+
+<P id="id_40">Системный вызов <SPAN class="texample"><SPAN class="keyword">semget</SPAN></SPAN> предназначен для выполнения операции доступа к массиву IPC-семафоров и, в случае ее успешного завершения, возвращает дескриптор System V IPC для этого массива (целое неотрицательное число, однозначно характеризующее массив семафоров внутри вычислительной системы и использующееся в дальнейшем для других операций с ним).</P><DIV class="lecture_mark" id="mark_40"></DIV>
+
+<P id="id_42">Параметр <SPAN class="texample">key</SPAN> является ключом System V IPC для массива семафоров, т. е. фактически его именем из пространства имен System V IPC. В качестве значения этого параметра может использоваться значение ключа, полученное с помощью функции <SPAN class="texample">ftok()</SPAN>, или специальное значение <SPAN class="texample">IPC_PRIVATE</SPAN>. Использование значения <SPAN class="texample">IPC_PRIVATE</SPAN> <B>всегда</B> приводит к попытке создания нового массива семафоров с ключом, который не совпадает со значением ключа ни одного из уже существующих массивов и не может быть получен с помощью функции <SPAN class="texample">ftok()</SPAN> ни при одной комбинации ее параметров.</P><DIV class="lecture_mark" id="mark_42"></DIV>
+
+<P id="id_48">Параметр <SPAN class="texample">nsems</SPAN> определяет количество семафоров в создаваемом или уже существующем массиве. В случае, если массив с указанным ключом уже имеется, но его размер не совпадает с указанным в параметре <SPAN class="texample">nsems</SPAN>, констатируется возникновение ошибки. </P><DIV class="lecture_mark" id="mark_48"></DIV>
+
+<P id="id_51">Параметр <SPAN class="texample">semflg</SPAN> – флаги – играет роль только при создании нового массива семафоров и определяет права различных пользователей при доступе к массиву, а также необходимость создания нового массива и поведение системного вызова при попытке создания. Он является некоторой комбинацией (с помощью операции побитовое или – "<SPAN class="texample">|</SPAN>") следующих предопределенных значений и восьмеричных прав доступа:</P><DIV class="lecture_mark" id="mark_51"></DIV>
+
+<P id="id_54"><SPAN class="texample">IPC_CREAT</SPAN> — если массива для указанного ключа не существует, он должен быть создан </P><DIV class="lecture_mark" id="mark_54"></DIV>
+
+<P id="id_56"><SPAN class="texample">IPC_EXCL</SPAN> — применяется совместно с флагом <SPAN class="texample">IPC_CREAT</SPAN>. При совместном их использовании и существовании массива с указанным ключом, доступ к массиву не производится и констатируется ошибка, при этом переменная <SPAN class="texample">errno</SPAN>, описанная в файле <SPAN class="texample">&lt;errno.h&gt;</SPAN>, примет значение <SPAN class="texample">EEXIST</SPAN></P><DIV class="lecture_mark" id="mark_56"></DIV>
+
+<UL id="id_62"><LI><SPAN class="texample">0400</SPAN> — разрешено чтение для пользователя, создавшего массив</LI><LI><SPAN class="texample">0200</SPAN> — разрешена запись для пользователя, создавшего массив</LI><LI><SPAN class="texample">0040</SPAN> — разрешено чтение для группы пользователя, создавшего массив</LI><LI><SPAN class="texample">0020</SPAN> — разрешена запись для группы пользователя, создавшего массив</LI><LI><SPAN class="texample">0004</SPAN> — разрешено чтение для всех остальных пользователей</LI><LI><SPAN class="texample">0002</SPAN> — разрешена запись для всех остальных пользователей</LI></UL><DIV class="lecture_mark" id="mark_62"></DIV>
+
+<P id="id_75">Вновь созданные семафоры инициируются нулевым значением.</P><DIV class="lecture_mark" id="mark_75"></DIV>
+
+<P id="id_76"><B>Возвращаемое значение</B></P><DIV class="lecture_mark" id="mark_76"></DIV>
+
+<P id="id_77">Системный вызов возвращает значение дескриптора System V IPC для массива семафоров при нормальном завершении и значение <SPAN class="texample">-1</SPAN> при возникновении ошибки.</P><DIV class="lecture_mark" id="mark_77"></DIV>
+
+</TD></TR></TBODY></TABLE></DIV><DIV class="lecture_mark" id="mark_35"></DIV><A name="sect3"></A><H3>Выполнение операций над семафорами. Системный вызов semop() </H3><P id="id_79"><A name="keyword-context.5"></A>Для выполнения операций <SPAN class="texample">A</SPAN>, <SPAN class="texample">D</SPAN> и <SPAN class="texample">Z</SPAN> над семафорами из <SPAN class="keyword">массива</SPAN> используется системный вызов <SPAN class="texample"><SPAN class="keyword_def">semop()</SPAN></SPAN>, обладающий довольно сложной семантикой. Разработчики <SPAN class="keyword">System V IPC</SPAN> явно перегрузили этот вызов, применяя его не только для выполнения всех трех операций, но еще и для нескольких семафоров в <SPAN class="keyword">массиве</SPAN> IPC-семафоров одновременно. Для правильного использования этого вызова необходимо выполнить следующие действия: </P><DIV class="lecture_mark" id="mark_79"></DIV><OL id="id_84"><LI>Определиться, для каких семафоров из <SPAN class="keyword">массива</SPAN> предстоит выполнить операции. Необходимо иметь в виду, что все операции реально совершаются только перед успешным возвращением из системного вызова, т.е. если вы хотите выполнить операции <SPAN class="texample"><SPAN class="keyword">A(S1,5)</SPAN></SPAN> и <SPAN class="texample"><SPAN class="keyword">Z(S2)</SPAN></SPAN> в одном вызове и оказалось, что <SPAN class="texample">S2 != 0</SPAN>, то значение семафора <SPAN class="texample">S1</SPAN> не будет изменено до тех пор, пока значение <SPAN class="texample">S2</SPAN> не станет равным <SPAN class="texample">0</SPAN>. Порядок выполнения операций в случае, когда процесс не переходит в состояние <B>ожидание</B>, не определен. Так, например, при одновременном выполнении операций <SPAN class="texample"><SPAN class="keyword">A(S1,1)</SPAN></SPAN> и <SPAN class="texample"><SPAN class="keyword">D(S2,1)</SPAN></SPAN> в случае <SPAN class="texample">S2 &gt; 1</SPAN> неизвестно, что произойдет раньше – уменьшится значение семафора <SPAN class="texample">S2</SPAN> или увеличится значение семафора
+
+ <SPAN class="texample">S1</SPAN>. Если порядок для вас важен, лучше применить несколько вызовов вместо одного. </LI><LI>После того как вы определились с количеством семафоров и совершаемыми операциями, необходимо завести в программе массив из элементов типа <SPAN class="texample">struct sembuf</SPAN> с размерностью, равной определенному количеству семафоров (если операция совершается только над одним семафором, можно, естественно, обойтись просто переменной). Каждый элемент этого массива будет соответствовать операции над одним семафором. </LI><LI>Заполнить элементы массива. В поле <SPAN class="texample">sem_flg</SPAN> каждого элемента нужно занести значение <SPAN class="texample">0</SPAN> (другие значения флагов в семинарах мы рассматривать не будем). В поля <SPAN class="texample">sem_num</SPAN> и <SPAN class="texample">sem_op</SPAN> следует занести номера семафоров в <SPAN class="keyword">массиве</SPAN> IPC семафоров и соответствующие коды операций. Семафоры нумеруются, начиная с <SPAN class="texample">0</SPAN>. Если у вас в <SPAN class="keyword">массиве</SPAN> всего один семафор, то он будет иметь номер <SPAN class="texample">0</SPAN>. Операции кодируются так: 
+
+<UL id="id_106"><LI>для выполнения операции <SPAN class="texample"><SPAN class="keyword">A(S,n)</SPAN></SPAN> значение поля <SPAN class="texample">sem_op</SPAN> должно быть равно <SPAN class="texample">n</SPAN>;</LI><LI>для выполнения операции <SPAN class="texample"><SPAN class="keyword">D(S,n)</SPAN></SPAN> значение поля <SPAN class="texample">sem_op</SPAN> должно быть равно <SPAN class="texample">–n</SPAN>;</LI><LI>для выполнения операции <SPAN class="texample"><SPAN class="keyword">Z(S)</SPAN></SPAN> значение поля <SPAN class="texample">sem_op</SPAN> должно быть равно <SPAN class="texample">0</SPAN>.</LI></UL><DIV class="lecture_mark" id="mark_106"></DIV>
+</LI><LI>В качестве второго параметра системного вызова <SPAN class="texample"><SPAN class="keyword">semop()</SPAN></SPAN> указать адрес заполненного <SPAN class="keyword">массива</SPAN>, а в качестве третьего параметра – ранее определенное количество семафоров, над которыми совершаются операции. </LI></OL><DIV class="lecture_mark" id="mark_84"></DIV><DIV class="xml_table_env" id="id_121"><A name=""></A><TABLE border="0" class="xml_table" cellpadding="2" cellspacing="1"><TBODY><TR><TD bgcolor="#eaeaea" valign="top">
+
+<P id="id_122"><B>Системный вызов semop()</B></P><DIV class="lecture_mark" id="mark_122"></DIV>
+
+<P id="id_123"><B>Прототип системного вызова</B></P><DIV class="lecture_mark" id="mark_123"></DIV>
+
+<DIV class="example"><PRE>#include &lt;sys/types.h&gt;
+#include &lt;sys/ipc.h&gt;
+#include &lt;sys/sem.h&gt;
+
+int semop(int semid, struct sembuf *sops, 
+          int nsops);
+</PRE></DIV>
+
+<P id="id_125"><B>Описание системного вызова</B></P><DIV class="lecture_mark" id="mark_125"></DIV>
+
+<P id="id_126"><SPAN class="keyword">Системный вызов semop</SPAN> предназначен для выполнения операций <SPAN class="texample">A</SPAN>, <SPAN class="texample">D</SPAN> и <SPAN class="texample">Z</SPAN> (см. описание операций над семафорами из массива IPC семафоров – раздел "Создание массива семафоров или доступ к уже существующему. Системный вызов <SPAN class="texample"><SPAN class="keyword">semget()</SPAN></SPAN>" этого семинара). Данное описание не является полным описанием системного вызова, а ограничивается рамками текущего курса. Для полного описания обращайтесь к UNIX Manual.</P><DIV class="lecture_mark" id="mark_126"></DIV>
+
+<P id="id_131">Параметр <SPAN class="texample">semid</SPAN> является дескриптором System V IPC для набора семафоров, т. е. значением, которое вернул системный вызов <SPAN class="texample"><SPAN class="keyword">semget()</SPAN></SPAN> при создании набора семафоров или при его поиске по ключу.</P><DIV class="lecture_mark" id="mark_131"></DIV>
+
+<P id="id_134">Каждый из <SPAN class="texample">nsops</SPAN> элементов массива, на который указывает параметр sops, определяет операцию, которая должна быть совершена над каким-либо семафором из массива IPC семафоров, и имеет тип структуры <SPAN class="texample">struct sembuf</SPAN>, в которую входят следующие переменные:</P><DIV class="lecture_mark" id="mark_134"></DIV>
+
+<UL id="id_137"><LI><SPAN class="texample">short sem_num</SPAN> — номер семафора в массиве IPC семафоров (нумеруются, начиная с <SPAN class="texample">0</SPAN>);</LI><LI><SPAN class="texample">short sem_op</SPAN> — выполняемая операция;</LI><LI><SPAN class="texample">short sem_flg</SPAN> — флаги для выполнения операции. В нашем курсе всегда будем считать эту переменную равной <SPAN class="texample">0</SPAN>.</LI></UL><DIV class="lecture_mark" id="mark_137"></DIV>
+
+<P id="id_146">Значение элемента структуры <SPAN class="texample">sem_op</SPAN> определяется следующим образом:</P><DIV class="lecture_mark" id="mark_146"></DIV>
+
+<UL id="id_148"><LI>для выполнения операции <SPAN class="texample">A(S,n)</SPAN> значение должно быть равно <SPAN class="texample">n</SPAN>;</LI><LI>для выполнения операции <SPAN class="texample">D(S,n)</SPAN> значение должно быть равно <SPAN class="texample">-n</SPAN>;</LI><LI>для выполнения операции <SPAN class="texample">Z(S)</SPAN> значение должно быть равно <SPAN class="texample">0</SPAN>.</LI></UL><DIV class="lecture_mark" id="mark_148"></DIV>
+
+<P id="id_158">Семантика системного вызова подразумевает, что все операции будут в реальности выполнены над семафорами только перед успешным возвращением из системного вызова. Если при выполнении операций <SPAN class="texample">D</SPAN> или <SPAN class="texample">Z</SPAN> процесс перешел в состояние ожидания, то он может быть вывеен из этого состояния при возникновении следующих форс-мажорных ситуаций:</P><DIV class="lecture_mark" id="mark_158"></DIV>
+
+<UL id="id_161"><LI>массив семафоров был удален из системы;</LI><LI>процесс получил сигнал, который должен быть обработан.</LI></UL><DIV class="lecture_mark" id="mark_161"></DIV>
+
+<P id="id_164">В этом случае происходит возврат из системного вызова с констатацией ошибочной ситуации.</P><DIV class="lecture_mark" id="mark_164"></DIV>
+
+<P id="id_165"><B>Возвращаемое значение</B></P><DIV class="lecture_mark" id="mark_165"></DIV>
+
+<P id="id_166">Системный вызов возвращает значение <SPAN class="texample">0</SPAN> при нормальном завершении и значение <SPAN class="texample">-1</SPAN> при возникновении ошибки.</P><DIV class="lecture_mark" id="mark_166"></DIV>
+
+</TD></TR></TBODY></TABLE></DIV><DIV class="lecture_mark" id="mark_121"></DIV><A name="sect4"></A><H3>Прогон примера с использованием семафора </H3><P id="id_169">Для иллюстрации сказанного рассмотрим простейшие программы, синхронизирующие свои действия с помощью семафоров</P><DIV class="lecture_mark" id="mark_169"></DIV><A name="example.8.1"></A><DIV class="example"><PRE> 
+/* Программа 08-1a.c для иллюстрации работы с 
+семафорами */ 
+/* Эта программа получает доступ к одному системному семафору,
+ждет, пока его значение не станет больше или равным 1 
+после запусков программы 08-1b.c,а затем уменьшает его на 1*/ 
+#include &lt;sys/types.h&gt;
+#include &lt;sys/ipc.h&gt;
+#include &lt;sys/sem.h&gt;
+#include &lt;stdio.h&gt;
+int main()
+{
+	int semid; /* IPC дескриптор для массива IPC 
+семафоров */
+	char pathname[] = "08-1a.c"; /* Имя файла, 
+		использующееся для генерации ключа. Файл с таким 
+		именем должен существовать в текущей директории */
+	key_t key; /* IPC ключ */ 
+	struct sembuf mybuf; /* Структура для задания 
+		операции над семафором */
+	/* Генерируем IPC-ключ из имени файла 08-1a.c в текущей
+	директории и номера экземпляра массива семафоров 0 */
+	if((key = ftok(pathname,0)) &lt; 0){
+		printf("Can\'t generate key\n");
+		exit(-1);
+	}
+	/* Пытаемся получить доступ по ключу к массиву 
+семафоров, если он существует, или создать его из одного 
+семафора, если его еще не существует, с правами доступа 
+read &amp; write для всех пользователей */ 
+	if((semid = semget(key, 1, 0666 | IPC_CREAT)) &lt; 0){
+		printf("Can\'t get semid\n");
+		exit(-1);
+	}
+	/* Выполним операцию D(semid1,1) для нашего массива 
+	семафоров. Для этого сначала заполним нашу структуру. 
+	Флаг, как обычно, полагаем равным 0. Наш массив семафоров 
+	состоит из одного семафора с номером 0. Код операции -1.*/
+	mybuf.sem_op = -1;
+	mybuf.sem_flg = 0;
+	mybuf.sem_num = 0;
+	if(semop(semid, &amp;mybuf, 1) &lt; 0){
+		printf("Can\'t wait for condition\n");
+		exit(-1);
+	}
+	printf("Condition is present\n");
+	return 0;
+}
+</PRE><SPAN class="objectName">
+            Листинг 
+            8.1.
+            Программа 08-1a.c для иллюстрации работы с семафорами</SPAN></DIV><A name="example.8.1b"></A><DIV class="example"><PRE>/* Программа 08-1b.c для иллюстрации работы с 
+семафорами */ 
+/* Эта программа получает доступ к одному системному семафору
+и увеличивает его на 1*/ 
+#include &lt;sys/types.h&gt;
+#include &lt;sys/ipc.h&gt;
+#include &lt;sys/sem.h&gt;
+#include &lt;stdio.h&gt;
+int main()
+{
+	int semid; /* IPC дескриптор для массива IPC 
+		семафоров */
+	char pathname[] = "08-1a.c"; /* Имя файла, 
+		использующееся для генерации ключа. Файл с таким 
+		именем должен существовать в текущей директории */
+	key_t key; /* IPC ключ */ 
+	struct sembuf mybuf; /* Структура для задания операции 
+	над семафором */
+	/* Генерируем IPC ключ из имени файла 08-1a.c в текущей 
+	директории и номера экземпляра массива семафоров 0 */
+	if((key = ftok(pathname,0)) &lt; 0){
+		printf("Can\'t generate key\n");
+		exit(-1);
+	}
+	/* Пытаемся получить доступ по ключу к массиву 
+семафоров, если он существует, или создать его из 
+одного семафора, если его еще не существует, с правами доступа
+read &amp; write для всех пользователей */ 
+	if((semid = semget(key, 1, 0666 | IPC_CREAT)) &lt; 0){
+		printf("Can\'t get semid\n");
+		exit(-1);
+	}
+	/* Выполним операцию A(semid1,1) для нашего массива 
+	семафоров. Для этого сначала заполним нашу структуру. 
+	Флаг, как обычно, 	полагаем равным 0. Наш массив 
+	семафоров состоит из одного семафора с номером 0. 
+	Код операции 1.*/
+	mybuf.sem_op = 1;
+	mybuf.sem_flg = 0;
+	mybuf.sem_num = 0;
+	if(semop(semid, &amp;mybuf, 1) &lt; 0){
+		printf("Can\'t wait for condition\n");
+		exit(-1);
+	}
+	printf("Condition is set\n");
+	return 0;
+}
+</PRE><SPAN class="objectName">
+            Листинг 
+            8.1b.
+            Программа 08-1b.c для иллюстрации работы с семафорами</SPAN></DIV><P id="id_172">Первая программа выполняет над семафором <SPAN class="texample">S</SPAN> операцию <SPAN class="texample"><SPAN class="keyword">D(S,1)</SPAN></SPAN>, вторая программа выполняет над тем же семафором операцию <SPAN class="texample"><SPAN class="keyword">A(S,1)</SPAN></SPAN>. Если семафора в системе не существует, любая программа создает его перед выполнением операции. Поскольку при создании семафор всегда инициируется <SPAN class="texample">0</SPAN>, то программа 1 может работать без блокировки только после запуска программы 2. Наберите программы, сохраните под именами <SPAN class="texample">08-1а.с</SPAN> и <SPAN class="texample">08-1b.c</SPAN> cоответственно, откомпилируйте и проверьте правильность их поведения.</P><DIV class="lecture_mark" id="mark_172"></DIV><A name="sect5"></A><H3>Изменение предыдущего примера </H3><P id="id_179">Измените программы из предыдущего раздела так, чтобы первая программа могла работать без блокировки после не менее 5 запусков второй программы.</P><DIV class="lecture_mark" id="mark_179"></DIV><A name="sect6"></A><H3>Удаление набора семафоров из системы с помощью команды ipcrm или системного вызова semctl() </H3><P id="id_180">Как мы видели в примерах, <SPAN class="keyword">массив семафоров</SPAN> может продолжать существовать в системе и после завершения использовавших его процессов, а семафоры будут сохранять свое значение. Это может привести к некорректному поведению программ, предполагающих, что семафоры были только что созданы и, следовательно, имеют нулевое значение. Необходимо удалять семафоры из системы перед запуском таких программ или перед их завершением. Для удаления семафоров можно воспользоваться командами <SPAN class="texample">ipcs</SPAN> и <SPAN class="texample">ipcrm</SPAN>, рассмотренными в материалах предыдущего семинара. Команда <SPAN class="texample">ipcrm</SPAN> в этом случае должна иметь вид </P><DIV class="lecture_mark" id="mark_180"></DIV><DIV class="example"><PRE>ipcrm sem &lt;IPC идентификатор&gt;</PRE></DIV><P id="id_185">Для этой же цели мы можем применять системный вызов <SPAN class="texample"><SPAN class="keyword">semctl()</SPAN></SPAN>, который умеет выполнять и другие операции над <SPAN class="keyword">массивом семафоров</SPAN>, но их рассмотрение выходит за рамки нашего курса.</P><DIV class="lecture_mark" id="mark_185"></DIV><DIV class="xml_table_env" id="id_187"><A name=""></A><TABLE border="0" class="xml_table" cellpadding="2" cellspacing="1"><TBODY><TR><TD bgcolor="#eaeaea" valign="top">
+
+<P id="id_188"><B>Системный вызов semctl()</B></P><DIV class="lecture_mark" id="mark_188"></DIV>
+
+<P id="id_189"><B>Прототип системного вызова</B></P><DIV class="lecture_mark" id="mark_189"></DIV>
+
+<DIV class="example"><PRE>#include &lt;sys/types.h&gt;
+#include &lt;sys/ipc.h&gt;
+#include &lt;sys/sem.h&gt;
+
+int semctl(int semid, int semnum, int cmd, 
+           union semun arg);
+</PRE></DIV>
+
+<P id="id_191"><B>Описание системного вызова</B></P><DIV class="lecture_mark" id="mark_191"></DIV>
+
+<P id="id_192">Системный вызов <SPAN class="texample"><SPAN class="keyword">semctl</SPAN></SPAN> предназначен для получения информации о массиве IPC семафоров, изменения его атрибутов и удаления его из системы. Данное описание не является полным описанием системного вызова, а ограничивается рамками текущего курса. Для изучения полного описания обращайтесь к UNIX Manual.</P><DIV class="lecture_mark" id="mark_192"></DIV>
+
+<P id="id_194">В нашем курсе мы будем применять системный вызов <SPAN class="texample"><SPAN class="keyword">semctl</SPAN></SPAN> только для удаления массива семафоров из системы. Параметр <SPAN class="texample">semid</SPAN> является дескриптором System V IPC для массива семафоров, т. е. значением, которое вернул системный вызов <SPAN class="texample"><SPAN class="keyword">semget()</SPAN></SPAN> при создании массива или при его поиске по ключу.</P><DIV class="lecture_mark" id="mark_194"></DIV>
+
+<P id="id_198">В качестве параметра <SPAN class="texample">cmd</SPAN> в рамках нашего курса мы всегда будем передавать значение <SPAN class="texample">IPC_RMID</SPAN> – команду для удаления сегмента разделяемой памяти с заданным идентификатором. Параметры <SPAN class="texample">semnum</SPAN> и <SPAN class="texample">arg</SPAN> для этой команды не используются, поэтому мы всегда будем подставлять вместо них значение <SPAN class="texample">0</SPAN>.</P><DIV class="lecture_mark" id="mark_198"></DIV>
+
+<P id="id_204">Если какие-либо процессы находились в состоянии ожидание для семафоров из удаляемого массива при выполнении системного вызова <SPAN class="texample"><SPAN class="keyword">semop()</SPAN></SPAN>, то они будут разблокированы и вернутся из вызова <SPAN class="texample"><SPAN class="keyword">semop()</SPAN></SPAN> с индикацией ошибки.</P><DIV class="lecture_mark" id="mark_204"></DIV>
+
+<P id="id_207"><B>Возвращаемое значение</B></P><DIV class="lecture_mark" id="mark_207"></DIV>
+
+<P id="id_208">Системный вызов возвращает значение <SPAN class="texample">0</SPAN> при нормальном завершении и значение <SPAN class="texample">-1</SPAN> при возникновении ошибки.</P><DIV class="lecture_mark" id="mark_208"></DIV>
+
+</TD></TR></TBODY></TABLE></DIV><DIV class="lecture_mark" id="mark_187"></DIV><A name="sect7"></A><H3>Написание, компиляция и прогон программы с организацией взаимоисключения с помощью семафоров для двух процессов, взаимодействующих через разделяемую память </H3><P id="id_211">В материалах семинаров 6–7 было показано, что любые неатомарные операции, связанные с изменением содержимого разделяемой памяти, представляют собой критическую секцию процесса или нити исполнения. Модифицируйте программы из раздела "Необходимость синхронизации процессов и нитей исполнения, использующих общую память" семинаров 6–7, которые иллюстрировали некорректную работу через разделяемую память, обеспечив с помощью семафоров взаимоисключения для их правильной работы. </P><DIV class="lecture_mark" id="mark_211"></DIV><A name="sect8"></A><H3>Написание, компиляция и прогон программы с организацией взаимной очередности с помощью семафоров для двух процессов, взаимодействующих через pipe </H3><P id="id_212">В материалах семинара 5, когда речь шла о связи родственных процессов через pipe, отмечалось, что pipe является однонаправленным каналом связи, и что для организации связи через один pipe в двух направлениях необходимо использовать механизмы взаимной синхронизации процессов. Организуйте двустороннюю поочередную связь процесса-родителя и процесса-ребенка через pipe, используя для синхронизации семафоры, модифицировав программу из раздела "Прогон программы для организации однонаправленной связи между родственными процессами через pipe" семинара 5.</P><DIV class="lecture_mark" id="mark_212"></DIV><A name="sect9"></A><H3>Понятие о POSIX-семафорах </H3><P id="id_213">В стандарте POSIX вводятся другие семафоры, полностью аналогичные семафорам Дейкстры. Для инициализации значения таких семафоров применяется функция <SPAN class="texample">sem_init()</SPAN>, аналогом операции <SPAN class="texample">P</SPAN> служит функция <SPAN class="texample">sem_wait()</SPAN>, а аналогом операции <SPAN class="texample">V</SPAN> – функция <SPAN class="texample">sem_post()</SPAN>. К сожалению, в Linux такие семафоры реализованы только для нитей исполнения одного процесса, и поэтому подробно мы на них останавливаться не будем.</P><DIV class="lecture_mark" id="mark_213"></DIV>
+
+
+	</TD>
+	</TR>
+	<TR><TD height="8"><IMG src="./5. Семафоры в UNIX как средство синхронизации процессов_files/empty.gif" width="1" height="8"></TD></TR>
+	</TBODY></TABLE>
+	<!-- /content -->
+
+</TD>
+<TD><IMG src="./5. Семафоры в UNIX как средство синхронизации процессов_files/empty.gif" width="8" height="1"></TD>
+</TR>
+</TBODY></TABLE>
+<!-- /bottom -->
+<TABLE border="0" cellpadding="0" cellspacing="0" width="100%">
+<TBODY><TR><TD class="orang" height="1"><IMG src="./5. Семафоры в UNIX как средство синхронизации процессов_files/empty.gif" width="1" height="1"></TD></TR>
+<TR><TD class="ltxt" align="center">© INTUIT.ru, 2003-2009. Все права защищены.</TD>
+</TR>
+</TBODY></TABLE>
+<!-- /bottom -->
+
+<SCRIPT src="./5. Семафоры в UNIX как средство синхронизации процессов_files/urchin.js" type="text/javascript">
+</SCRIPT>
+<SCRIPT type="text/javascript">
+_uacct = "UA-3475067-1";
+urchinTracker();
+</SCRIPT>
+
+
+</BODY></HTML>

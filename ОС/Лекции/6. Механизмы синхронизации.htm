@@ -1,0 +1,440 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=windows-1251">
+<title>INTUIT.ru::Интернет-Университет Информационных Технологий</title>
+<link href="6. Механизмы синхронизации_files/printabl.css" type="text/css" rel="stylesheet">
+</head>
+<body leftmargin="6" topmargin="6" marginheight="6" marginwidth="6">
+
+
+<div align="left">
+<span style="color: #000000; font-weight: bold;">
+&nbsp;&nbsp;
+<span style="font-size:12pt;">Интернет-Университет Информационных Технологий</span>
+</span>
+</div>
+
+&nbsp;&nbsp;
+<span align="rright" style="color: #330066; text-decoration:underline;">http://www.INTUIT.ru</span>
+
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr><td height="8" colspan=3><img src="6. Механизмы синхронизации_files/empty000.gif" width="1" height="8"></td></tr>
+<tr><td class="orang" height="1" colspan=3><img src="6. Механизмы синхронизации_files/empty000.gif" width="1" height="1"></td></tr>
+<tr><td height="8" colspan=3><img src="6. Механизмы синхронизации_files/empty000.gif" width="1" height="8"></td></tr>
+<tr valign="top">
+<td><img src="6. Механизмы синхронизации_files/empty000.gif" width="8" height="1"></td>
+<td>
+	<!-- content -->
+	<table border="0" cellpadding="0" cellspacing="0" width="100%">
+	<tr><td class="head">Основы операционных систем</td></tr>
+<tr><td height="4"><img src="6. Механизмы синхронизации_files/empty000.gif" width="1" height="4"></td></tr>
+	<tr><td class="orang" height="1"><img src="6. Механизмы синхронизации_files/empty000.gif" width="1" height="1"></td></tr>
+	<tr><td height="8"><img src="6. Механизмы синхронизации_files/empty000.gif" width="1" height="8"></td></tr>
+	<tr><td><span class="headsub">
+
+
+6. Лекция:
+
+ Механизмы синхронизации: версия для печати и PDA</span>
+
+<br>
+<span class="rtxt">Для повышения производительности вычислительных систем и 
+   облегчения задачи программистов существуют специальные механизмы 
+   синхронизации. Описание некоторых из них – семафоров Дейкстры, 
+   мониторов Хора, очередей сообщений – приводится в этой лекции.
+</span>
+
+</td></tr>
+
+	<tr><td height="8"><img src="6. Механизмы синхронизации_files/empty000.gif" width="1" height="8"></td></tr>
+	<tr><td class="orang" height="1"><img src="6. Механизмы синхронизации_files/empty000.gif" width="1" height="1"></td></tr>
+	<tr><td height="8"><img src="6. Механизмы синхронизации_files/empty000.gif" width="1" height="8"></td></tr>
+	<tr><td>
+
+
+<h3 ></h3><p  id="id_1">Рассмотренные в конце предыдущей лекции алгоритмы хотя и являются 
+   корректными, но достаточно громоздки и не обладают элегантностью. 
+   Более того, процедура ожидания входа в критический участок предполагает 
+   достаточно длительное вращение процесса в пустом цикле, то есть 
+   напрасную трату драгоценного времени процессора. Существуют и 
+   другие серьезные недостатки у алгоритмов, построенных средствами 
+   обычных языков программирования. Допустим, что в вычислительной 
+   системе находятся два взаимодействующих процесса: один из них – 
+   <span class="texample">H</span> – с высоким приоритетом, другой – <span class="texample">L</span> – с низким приоритетом. 
+   Пусть планировщик устроен так, что процесс с высоким приоритетом 
+   вытесняет низкоприоритетный процесс всякий раз, когда он готов к 
+   исполнению, и занимает процессор на все время своего CPU burst 
+   (если не появится процесс с еще большим приоритетом). Тогда в случае, 
+   если процесс <span class="texample">L</span> находится в своей критической секции, а процесс <span class="texample">H</span>, 
+   получив процессор, подошел ко входу в критическую область, мы получаем 
+   тупиковую ситуацию. Процесс <span class="texample">H</span> не может войти в критическую область, 
+   находясь в цикле, а процесс <span class="texample">L</span> не получает управления, чтобы покинуть 
+   критический участок. </p><div  class="lecture_mark" id="mark_1"></div><p  id="id_8">Для того чтобы не допустить возникновения подобных проблем, были 
+   разработаны различные <span class="keyword">механизмы синхронизации</span> более высокого уровня. 
+   Описанию ряда из них – <span class="keyword">семафоров</span>, <span class="keyword">мониторов</span> и сообщений – и посвящена 
+   данная лекция.</p><div  class="lecture_mark" id="mark_8"></div><h3 >Семафоры</h3><p  id="id_9">Одним из первых <span class="keyword">механизмов</span>, предложенных для синхронизации 
+   поведения процессов, стали <span class="keyword">семафоры</span>, концепцию которых описал 
+   Дейкстра (Dijkstra) в 1965 году.</p><div  class="lecture_mark" id="mark_9"></div><h4 >Концепция семафоров</h4><p  id="id_10"><span class="keyword">
+	  	<span class="keyword_def">Семафор</span> представляет собой целую переменную, принимающую 
+      неотрицательные значения, доступ любого процесса к которой, 
+      за исключением момента ее инициализации, может осуществляться 
+      только через две атомарные операции: P (от датского слова 
+      proberen – проверять) и V (от verhogen – увеличивать).</span>
+      Классическое определение этих операций выглядит следующим образом:</p><div  class="lecture_mark" id="mark_10"></div><div  class="example"><pre>
+P(S):   пока S == 0 процесс блокируется; 
+        S = S – 1; 
+V(S):   S = S + 1; 
+</pre></div><p  id="id_12">Эта запись означает следующее: при выполнении операции <span class="texample">P</span> над 
+      <span class="keyword">семафором</span> <span class="texample">S</span> сначала проверяется его значение. Если оно больше <span class="texample">0</span>, 
+      то из <span class="texample">S</span> вычитается <span class="texample">1</span>. Если оно меньше или равно <span class="texample">0</span>, то процесс 
+      блокируется до тех пор, пока <span class="texample">S</span> не станет больше <span class="texample">0</span>, после чего 
+      из <span class="texample">S</span> вычитается <span class="texample">1</span>. При выполнении операции <span class="texample">V</span> над <span class="keyword">семафором</span> <span class="texample">S</span> к 
+      его значению просто прибавляется <span class="texample">1</span>. В момент создания <span class="keyword">семафор</span> 
+      может быть инициализирован любым неотрицательным значением.</p><div  class="lecture_mark" id="mark_12"></div><p  id="id_26">Подобные переменные-семафоры могут с успехом применяться для 
+      решения различных задач организации взаимодействия процессов. В 
+      ряде языков программирования они были непосредственно введены в 
+      синтаксис языка (например, в ALGOL-68), в других случаях реализуются 
+      с помощью специальных системных вызовов. Соответствующая целая 
+      переменная располагается внутри адресного пространства ядра 
+      операционной системы. Операционная система обеспечивает атомарность 
+      операций <span class="texample">P</span> и <span class="texample">V</span>, используя, например, метод запрета прерываний на 
+      время выполнения соответствующих системных вызовов. Если при 
+      выполнении операции <span class="texample">P</span> заблокированными оказались несколько процессов, 
+      то порядок их разблокирования может быть произвольным, например, FIFO.</p><div  class="lecture_mark" id="mark_26"></div><h4 >Решение проблемы producer-consumer с помощью семафоров</h4><p  id="id_30">Одной из типовых задач, требующих организации взаимодействия 
+      процессов, является задача <span class="keyword_def">producer-consumer</span> (производитель-потребитель). 
+      Пусть два процесса обмениваются информацией через буфер ограниченного 
+      размера. Производитель закладывает информацию в буфер, а потребитель 
+      извлекает ее оттуда. На этом уровне деятельность потребителя и 
+      производителя можно описать следующим образом.</p><div  class="lecture_mark" id="mark_30"></div><div  class="example"><pre>
+Producer:  while(1) { 
+              produce_item; 
+              put_item; 
+           } 
+Consumer:  while(1) { 
+              get_item; 
+              consume_item; 
+           } 
+</pre></div><p  id="id_32">Если буфер заполнен, то производитель должен ждать, пока в нем 
+      появится место, чтобы положить туда новую порцию информации. Если 
+      буфер пуст, то потребитель должен дожидаться нового сообщения. Как 
+      можно реализовать эти условия с помощью <span class="keyword">семафоров</span>? Возьмем три 
+      <span class="keyword">семафора</span>: <span class="texample">empty</span>, <span class="texample">full</span> и <span class="texample">mutex</span>. <span class="keyword">Семафор</span> <span class="texample">full</span> будем использовать 
+      для гарантии того, что потребитель будет ждать, пока в буфере 
+      появится информация. <span class="keyword">Семафор</span> <span class="texample">empty</span> будем использовать для организации 
+      ожидания производителя при заполненном буфере, а <span class="keyword">семафор</span> <span class="texample">mutex</span> – 
+      для организации взаимоисключения на критических участках, которыми 
+      являются действия <span class="texample">put_item</span> и <span class="texample">get_item</span> (операции "положить информацию" 
+      и "взять информацию" не могут пересекаться, так как в этом случае 
+      возникнет опасность искажения информации). Тогда решение задачи на 
+      C-подобном языке выглядит так:</p><div  class="lecture_mark" id="mark_32"></div><div  class="example"><pre>
+   Semaphore mutex = 1;
+   Semaphore empty = N; /* где N – емкость буфера*/
+   Semaphore full = 0; 
+Producer: 
+   while(1) { 
+      produce_item; 
+      P(empty); 
+      P(mutex); 
+      put_item; 
+      V(mutex); 
+      V(full); 
+   } 
+Consumer: 
+   while(1) { 
+      P(full); 
+      P(mutex); 
+      get_item; 
+      V(mutex); 
+      V(empty); 
+      consume_item; 
+   } 
+</pre></div><p  id="id_42">Легко убедиться, что это действительно корректное решение 
+      поставленной задачи. Попутно заметим, что <span class="keyword">семафоры</span> использовались 
+      здесь для достижения двух целей: организации взаимоисключения на 
+      критическом участке и взаимосинхронизации скорости работы процессов.</p><div  class="lecture_mark" id="mark_42"></div><h3 >Мониторы</h3><p  id="id_43">Хотя решение <span class="keyword">задачи producer-consumer</span> с помощью <span class="keyword">семафоров</span> 
+      выглядит достаточно изящно, программирование с их использованием 
+      требует повышенной осторожности и внимания, чем отчасти напоминает 
+      программирование на языке Ассемблера. Допустим, что в рассмотренном 
+      примере мы случайно поменяли местами операции <span class="texample">P</span>, сначала выполнив 
+      операцию для <span class="keyword">семафора</span> <span class="texample">mutex</span>, а уже затем для <span class="keyword">семафоров</span> <span class="texample">full</span> и <span class="texample">empty</span>. 
+      Допустим теперь, что потребитель, войдя в свой критический участок 
+      (<span class="texample">mutex</span> сброшен), обнаруживает, что буфер пуст. Он блокируется и 
+      начинает ждать появления сообщений. Но производитель не может войти 
+      в критический участок для передачи информации, так как тот заблокирован 
+      потребителем. Получаем тупиковую ситуацию.</p><div  class="lecture_mark" id="mark_43"></div><p  id="id_49">В сложных программах произвести анализ правильности использования 
+      <span class="keyword">семафоров</span> с карандашом в руках становится очень непросто. В то же время 
+      обычные способы отладки программ зачастую не дают результата, поскольку 
+      возникновение ошибок зависит от interleaving атомарных операций, и ошибки 
+      могут быть трудновоспроизводимы. Для того чтобы облегчить работу 
+      программистов, в 1974 году Хором (Hoare) был предложен механизм еще 
+      более высокого уровня, чем <span class="keyword">семафоры</span>, получивший название <span class="keyword">мониторов</span>. 
+      Мы с вами рассмотрим конструкцию, несколько отличающуюся от оригинальной. </p><div  class="lecture_mark" id="mark_49"></div><p  id="id_50"><a name="keyword-context.1"></a>
+	  	<span class="keyword_def">Мониторы</span> представляют собой тип данных, который может быть с успехом 
+      внедрен в объектно-ориентированные языки программирования. <span class="keyword">Монитор</span> 
+      обладает собственными переменными, определяющими его состояние. 
+      Значения этих переменных извне могут быть изменены только с помощью 
+      вызова функций-методов, принадлежащих <span class="keyword">монитору</span>. В свою очередь, эти 
+      функции-методы могут использовать в работе только данные, находящиеся 
+      внутри <span class="keyword">монитора</span>, и свои параметры. На абстрактном уровне можно описать 
+      структуру <span class="keyword">монитора</span> следующим образом:</p><div  class="lecture_mark" id="mark_50"></div><div  class="example"><pre>
+monitor monitor_name { 
+   описание внутренних переменных ;
+
+   void m1(...){...
+   }
+   void m2(...){...
+   }
+   ...
+   void mn(...){...
+   }
+
+   {
+      блок инициализации 
+      внутренних переменных;
+   }
+}
+</pre></div><p  id="id_52">Здесь функции <span class="texample">m<sub>1</sub>,..., m<sub>n</sub></span> представляют 
+      собой функции-методы <span class="keyword">монитора</span>, а блок инициализации внутренних переменных 
+      содержит операции, которые выполняются один и только один раз: при создании 
+      <span class="keyword">монитора</span> или при самом первом вызове какой-либо функции-метода до ее исполнения.</p><div  class="lecture_mark" id="mark_52"></div><p  id="id_54">Важной особенностью мониторов является то, что в любой момент времени 
+      только один процесс может быть активен, т. е. находиться в состоянии 
+      <b>готовность</b> или <b>исполнение</b>, внутри данного <span class="keyword">монитора</span>. Поскольку <span class="keyword">мониторы</span> 
+      представляют собой особые конструкции языка программирования, компилятор 
+      может отличить вызов функции, принадлежащей <span class="keyword">монитору</span>, от вызовов других 
+      функций и обработать его специальным образом, добавив к нему пролог и 
+      эпилог, реализующий взаимоисключение. Так как обязанность конструирования 
+      механизма взаимоисключений возложена на компилятор, а не на программиста, 
+      работа программиста при использовании <span class="keyword">мониторов</span> существенно упрощается, а 
+      вероятность возникновения ошибок становится меньше. </p><div  class="lecture_mark" id="mark_54"></div><p  id="id_55">Однако одних только взаимоисключений недостаточно для того, чтобы в 
+      полном объеме реализовать решение задач, возникающих при взаимодействии 
+      процессов. Нам нужны еще и средства организации очередности процессов, 
+      подобно <span class="keyword">семафорам</span> <span class="texample">full</span> и <span class="texample">empty</span> в предыдущем примере. Для этого в <span class="keyword">мониторах</span> 
+      было введено понятие условных переменных (condition variables)<sup><a href="" class="objectName">1)</a></sup>, над 
+      которыми можно совершать две операции <span class="texample">wait</span> и <span class="texample">signal</span>, отчасти похожие на 
+      операции <span class="texample">P</span> и <span class="texample">V</span> над <span class="keyword">семафорами</span>.</p><div  class="lecture_mark" id="mark_55"></div><p  id="id_63">Если функция <span class="keyword">монитора</span> не может выполняться дальше, пока не 
+      наступит некоторое событие, она выполняет операцию <span class="texample">wait</span> над 
+      какой-либо <span class="keyword">условной переменной</span>. При этом процесс, выполнивший 
+      операцию <span class="texample">wait</span>, блокируется, становится неактивным, и другой 
+      процесс получает возможность войти в <span class="keyword">монитор</span>.</p><div  class="lecture_mark" id="mark_63"></div><p  id="id_66">Когда ожидаемое событие происходит, другой процесс внутри 
+      функции-метода совершает операцию <span class="texample">signal</span> над той же самой 
+      <span class="keyword">условной переменной</span>. Это приводит к пробуждению ранее заблокированного 
+      процесса, и он становится активным. Если несколько процессов дожидались 
+      операции <span class="texample">signal</span> для этой переменной, то активным становится только один 
+      из них. Что можно предпринять для того, чтобы у нас не оказалось двух 
+      процессов, разбудившего и пробужденного, одновременно активных внутри 
+      <span class="keyword">монитора</span>? Хор предложил, чтобы пробужденный процесс подавлял исполнение 
+      разбудившего процесса, пока он сам не покинет <span class="keyword">монитор</span>. Несколько позже 
+      Хансен (Hansen) предложил другой механизм: разбудивший процесс покидает 
+      <span class="keyword">монитор</span> немедленно после исполнения операции <span class="texample">signal</span>. Мы будем придерживаться 
+      подхода Хансена.</p><div  class="lecture_mark" id="mark_66"></div><p  id="id_70"><b>Необходимо отметить, что условные переменные, в отличие от 
+      семафоров Дейкстры, не умеют запоминать предысторию. Это означает, 
+      что операция</b> <span class="texample">signal</span> <b>всегда должна выполняться после операции</b> <span class="texample">wait</span>.
+      <b>Если операция</b> <span class="texample">signal</span> <b>выполняется над условной переменной, с которой 
+      не связано ни одного заблокированного процесса, то информация о 
+      произошедшем событии будет утеряна. Следовательно, выполнение операции</b> 
+      <span class="texample">wait</span> <b>всегда будет приводить к блокированию процесса</b>.</p><div  class="lecture_mark" id="mark_70"></div><p  id="id_75">Давайте применим концепцию <span class="keyword">мониторов</span> к решению задачи производитель-потребитель.</p><div  class="lecture_mark" id="mark_75"></div><div  class="example"><pre>
+   monitor ProducerConsumer { 
+      condition full, empty; 
+      int count;
+      void put() { 
+         if(count == N) full.wait; 
+         put_item; 
+         count += 1; 
+         if(count == 1) empty.signal; 
+      } 
+      void get() { 
+         if (count == 0) empty.wait; 
+         get_item(); 
+         count -= 1; 
+         if(count == N-1) full.signal; 
+      } 
+      { 
+         count = 0; 
+      } 
+   } 
+
+Producer: 
+   while(1) { 
+      produce_item; 
+      ProducerConsumer.put(); 
+   } 
+Consumer: 
+   while(1) { 
+      ProducerConsumer.get(); 
+      consume_item; 
+   } 
+</pre></div><p  id="id_77">Легко убедиться, что приведенный пример действительно решает поставленную задачу. </p><div  class="lecture_mark" id="mark_77"></div><p  id="id_78">Реализация <span class="keyword">мониторов</span> требует разработки специальных языков 
+      программирования и компиляторов для них. <span class="keyword">Мониторы</span> встречаются в 
+      таких языках, как параллельный Евклид, параллельный Паскаль, 
+      Java и т. д. Эмуляция <span class="keyword">мониторов</span> с помощью системных вызовов для 
+      обычных широко используемых языков программирования не так проста, 
+      как эмуляция <span class="keyword">семафоров</span>. Поэтому можно пользоваться еще одним 
+      механизмом со скрытыми взаимоисключениями, механизмом, о котором 
+      мы уже упоминали, – передачей сообщений.</p><div  class="lecture_mark" id="mark_78"></div><h3 >Сообщения </h3><p  id="id_79">Для прямой и непрямой адресации достаточно двух примитивов, 
+      чтобы описать передачу сообщений по линии связи – <span class="texample">send</span> и <span class="texample">receive</span>. 
+      В случае прямой адресации мы будем обозначать их так:</p><div  class="lecture_mark" id="mark_79"></div><div  class="xml_table_env" id="id_82"><a name=""></a><table border="0" class="xml_table" cellpadding="2" cellspacing="1"><tr><td valign="top"><span class="texample">send(P, message)</span> – послать сообщение message процессу <span class="texample">P</span>;</td></tr><tr><td valign="top"><span class="texample">receive(Q, message)</span> – получить сообщение message от процесса <span class="texample">Q</span>.</td></tr></table></div><div  class="lecture_mark" id="mark_82"></div><p  id="id_87">В случае непрямой адресации мы будем обозначать их так:</p><div  class="lecture_mark" id="mark_87"></div><div  class="xml_table_env" id="id_88"><a name=""></a><table border="0" class="xml_table" cellpadding="2" cellspacing="1"><tr><td valign="top"><span class="texample">send(A, message)</span> – послать сообщение message в почтовый ящик <span class="texample">A</span>;</td></tr><tr><td valign="top"><span class="texample">receive(A, message)</span> – получить сообщение message из почтового ящика <span class="texample">A</span>.</td></tr></table></div><div  class="lecture_mark" id="mark_88"></div><p  id="id_93">Примитивы <span class="texample">send</span> и <span class="texample">receive</span> уже имеют 
+      скрытый от наших глаз механизм взаимоисключения. Более того, в 
+      большинстве систем они уже имеют и скрытый механизм блокировки при 
+      чтении из пустого буфера и при записи в полностью заполненный буфер. 
+      Реализация решения задачи <span class="keyword">producer-consumer</span> для таких примитивов 
+      становится неприлично тривиальной. Надо отметить, что, несмотря на 
+      простоту использования, передача сообщений в пределах одного компьютера 
+      происходит существенно медленнее, чем работа с <span class="keyword">семафорами</span> и <span class="keyword">мониторами</span>.</p><div  class="lecture_mark" id="mark_93"></div><h3 >Эквивалентность семафоров, мониторов и сообщений </h3><p  id="id_96">Мы рассмотрели три высокоуровневых механизма, использующихся для 
+   организации взаимодействия процессов. Можно показать, что в рамках 
+   одной вычислительной системы, когда процессы имеют возможность использовать 
+   разделяемую память, все они эквивалентны. Это означает, что любые два 
+   из предложенных механизмов могут быть реализованы на базе третьего, 
+   оставшегося механизма.</p><div  class="lecture_mark" id="mark_96"></div><h4 >Реализация мониторов и передачи сообщений с помощью семафоров</h4><p  id="id_97">Рассмотрим сначала, как реализовать <span class="keyword">мониторы</span> с помощью 
+      <span class="keyword">семафоров</span>. Для этого нам нужно уметь реализовывать взаимоисключения 
+      при входе в <span class="keyword">монитор</span> и <span class="keyword">условные переменные</span>. Возьмем <span class="keyword">семафор</span> <span class="texample">mutex</span> с 
+      начальным значением <span class="texample">1</span> для реализации взаимоисключения при входе в 
+      <span class="keyword">монитор</span> и по одному <span class="keyword">семафору</span> <span class="texample">c<sub>i</sub></span> для каждой <span class="keyword">условной переменной</span>. 
+      Кроме того, для каждой <span class="keyword">условной переменной</span> заведем счетчик <span class="texample">f<sub>i</sub></span> для 
+      индикации наличия ожидающих процессов. Когда процесс входит в <span class="keyword">монитор</span>, 
+      компилятор будет генерировать вызов функции <span class="texample">monitor_enter</span>, которая 
+      выполняет операцию <span class="texample">P</span> над <span class="keyword">семафором</span> <span class="texample">mutex</span> для данного <span class="keyword">монитора</span>. При 
+      нормальном выходе из <span class="keyword">монитора</span> (то есть при выходе без вызова операции 
+      <span class="texample">signal</span> для <span class="keyword">условной переменной</span>) компилятор будет генерировать вызов 
+      функции <span class="texample">monitor_exit</span>, которая выполняет операцию <span class="texample">V</span> над этим <span class="keyword">семафором</span>.</p><div  class="lecture_mark" id="mark_97"></div><p  id="id_108">Для выполнения операции <span class="texample">wait</span> над <span class="keyword">условной переменной</span> 
+      компилятор будет генерировать вызов функции <span class="texample">wait</span>, которая 
+      выполняет операцию <span class="texample">V</span> для <span class="keyword">семафора</span> <span class="texample">mutex</span>, 
+      разрешая другим процессам входить в <span class="keyword">монитор</span>, и выполняет операцию <span class="texample">P</span> 
+      над соответствующим <span class="keyword">семафором</span> <span class="texample">c<sub>i</sub></span>, блокируя 
+      вызвавший процесс. Для выполнения операции <span class="texample">signal</span> над 
+      <span class="keyword">условной переменной</span> компилятор будет генерировать вызов функции 
+      <span class="texample">signal_exit</span>, которая выполняет операцию <span class="texample">V</span> над 
+      ассоциированным <span class="keyword">семафором</span> <span class="texample">c<sub>i</sub></span> (если есть процессы, 
+      ожидающие соответствующего события), и выход из <span class="keyword">монитора</span>, минуя функцию <span class="texample">monitor_exit</span>.</p><div  class="lecture_mark" id="mark_108"></div><div  class="example"><pre>
+Semaphore mutex = 1; 
+
+void monitor_enter(){ 
+   P(mutex); 
+} 
+
+void monitor_exit(){ 
+   V(mutex); 
+} 
+
+Semaphore c<sub>i</sub> = 0; 
+int f<sub>i</sub> = 0;
+
+void wait(i){ 
+   f<sub>i</sub>=f<sub>i</sub> + 1;
+   V(mutex);
+   P(c<sub>i</sub>);
+   f<sub>i</sub>=f<sub>i</sub> - 1;
+} 
+
+void signal_exit(i){ 
+   if (f<sub>i</sub>)V(c<sub>i</sub>); 
+   else V(mutex);
+} 
+</pre></div><p  id="id_121">Заметим, что при выполнении функции <span class="texample">signal_exit</span>, если 
+      кто-либо ожидал этого события, процесс покидает <span class="keyword">монитор</span> без увеличения 
+      значения <span class="keyword">семафора</span> <span class="texample">mutex</span>, не разрешая тем самым всем 
+      процессам, кроме разбуженного, войти в <span class="keyword">монитор</span>. Это увеличение совершит 
+      разбуженный процесс, когда покинет <span class="keyword">монитор</span> обычным способом или когда 
+      выполнит новую операцию <span class="texample">wait</span> над какой-либо <span class="keyword">условной переменной</span>.</p><div  class="lecture_mark" id="mark_121"></div><p  id="id_125">Рассмотрим теперь, как реализовать передачу сообщений, используя 
+      <span class="keyword">семафоры</span>. Для простоты опишем реализацию только одной <span class="keyword">очереди сообщений</span>.
+      Выделим в разделяемой памяти достаточно большую область под хранение 
+      сообщений, там же будем записывать, сколько пустых и заполненных ячеек 
+      находится в буфере, хранить ссылки на списки процессов, ожидающих чтения 
+      и памяти. Взаимоисключение при работе с разделяемой памятью будем 
+      обеспечивать <span class="keyword">семафором</span> <span class="texample">mutex</span>. Также заведем по одному 
+      <span class="keyword">семафору</span> <span class="texample">c<sub>i</sub></span> на взаимодействующий процесс, 
+      для того чтобы обеспечивать блокирование процесса при попытке чтения 
+      из пустого буфера или при попытке записи в переполненный буфер. Посмотрим, 
+      как такой механизм будет работать. Начнем с процесса, желающего получить сообщение.</p><div  class="lecture_mark" id="mark_125"></div><p  id="id_128">Процесс-получатель с номером <span class="texample">i</span> прежде всего выполняет 
+      операцию <span class="texample">P(mutex)</span>, получая в монопольное владение разделяемую 
+      память. После чего он проверяет, есть ли в буфере сообщения. Если нет, 
+      то он заносит себя в список процессов, ожидающих сообщения, выполняет 
+      <span class="texample">V(mutex)</span> и <span class="texample">P(c<sub>i</sub>)</span>. Если сообщение 
+      в буфере есть, то он читает его, изменяет счетчики буфера и проверяет, 
+      есть ли процессы в списке процессов, жаждущих записи. Если таких процессов нет, то выполняется <span class="texample">V(mutex)</span>, и процесс-получатель выходит из критической области. Если такой процесс 
+      есть (с номером <span class="texample">j</span>), то он удаляется из этого списка, выполняется 
+      <span class="texample">V</span> для его <span class="keyword">семафора</span> <span class="texample">c<sub>j</sub></span>, и мы выходим 
+      из критического района. Проснувшийся процесс начинает выполняться в 
+      критическом районе, так как <span class="texample">mutex</span> у нас имеет значение <span class="texample">0</span> 
+      и никто более не может попасть в критический район. При выходе из критического 
+      района именно разбуженный процесс произведет вызов <span class="texample">V(mutex)</span>.</p><div  class="lecture_mark" id="mark_128"></div><p  id="id_140">Как строится работа процесса-отправителя с номером <span class="texample">i</span>? 
+      Процесс, посылающий сообщение, тоже ждет, пока он не сможет иметь 
+      монополию на использование разделяемой памяти, выполнив операцию 
+      <span class="texample">P(mutex)</span>. Далее он проверяет, есть ли место в буфере, 
+      и если да, то помещает сообщение в буфер, изменяет счетчики и смотрит, 
+      есть ли процессы, ожидающие сообщения. Если нет, выполняет <span class="texample">V(mutex)</span> 
+      и выходит из критической области, если есть, "будит" один из них 
+      (с номером <span class="texample">j</span>), вызывая <span class="texample">V(c<sub>j</sub>)</span>, с 
+      одновременным удалением этого процесса из списка процессов, ожидающих 
+      сообщений, и выходит из критического региона без вызова <span class="texample">V(mutex)</span>, 
+      предоставляя тем самым возможность разбуженному процессу прочитать 
+      сообщение. Если места в буфере нет, то процесс-отправитель заносит 
+      себя в очередь процессов, ожидающих возможности записи, и вызывает <span class="texample">V(mutex)</span> и <span class="texample">P(c<sub>i</sub>)</span>.</p><div  class="lecture_mark" id="mark_140"></div><h4 >Реализация семафоров и передачи сообщений с помощью мониторов</h4><p  id="id_149">Нам достаточно показать, что с помощью <span class="keyword">мониторов</span> можно 
+      реализовать <span class="keyword">семафоры</span>, так как получать из <span class="keyword">семафоров</span> сообщения мы уже умеем.</p><div  class="lecture_mark" id="mark_149"></div><p  id="id_150">Самый простой способ такой реализации выглядит следующим образом. 
+      Заведем внутри <span class="keyword">монитора</span> переменную-счетчик, связанный с эмулируемым 
+      <span class="keyword">семафором</span> список блокируемых процессов и по одной <span class="keyword">условной переменной</span> 
+      на каждый процесс. При выполнении операции <span class="texample">P</span> над <span class="keyword">семафором</span> вызывающий 
+      процесс проверяет значение счетчика. Если оно больше нуля, уменьшает 
+      его на <span class="texample">1</span> и выходит из <span class="keyword">монитора</span>. Если оно равно <span class="texample">0</span>, процесс добавляет 
+      себя в очередь процессов, ожидающих события, и выполняет операцию <span class="texample">wait</span> 
+      над своей <span class="keyword">условной переменной</span>. При выполнении операции <span class="texample">V</span> над <span class="keyword">семафором</span> 
+      процесс увеличивает значение счетчика, проверяет, есть ли процессы, 
+      ожидающие этого события, и если есть, удаляет один из них из списка и 
+      выполняет операцию <span class="texample">signal</span> для <span class="keyword">условной переменной</span>, соответствующей процессу.</p><div  class="lecture_mark" id="mark_150"></div><h4 >Реализация семафоров и мониторов с помощью очередей сообщений</h4><p  id="id_157">Покажем, наконец, как реализовать <span class="keyword">семафоры</span> с помощью <span class="keyword">очередей 
+      сообщений</span>. Для этого воспользуемся более хитрой конструкцией, введя 
+      новый синхронизирующий процесс. Этот процесс имеет счетчик и очередь 
+      для процессов, ожидающих включения <span class="keyword">семафора</span>. Для того чтобы выполнить 
+      операции <span class="texample">P</span> и <span class="texample">V</span>, процессы посылают синхронизирующему процессу сообщения, 
+      в которых указывают свои потребности, после чего ожидают получения 
+      подтверждения от синхронизирующего процесса.</p><div  class="lecture_mark" id="mark_157"></div><p  id="id_160">После получения сообщения синхронизирующий процесс проверяет 
+      значение счетчика, чтобы выяснить, можно ли совершить требуемую 
+      операцию. Операция <span class="texample">V</span> всегда может быть выполнена, в то время как 
+      операция <span class="texample">P</span> может потребовать блокирования процесса. Если операция 
+      может быть совершена, то она выполняется, и синхронизирующий процесс 
+      посылает подтверждающее сообщение. Если процесс должен быть блокирован, 
+      то его идентификатор заносится в очередь блокированных процессов, и 
+      подтверждение не посылается. Позднее, когда какой-либо из других 
+      процессов выполнит операцию <span class="texample">V</span>, один из блокированных процессов удаляется 
+      из очереди ожидания и получает соответствующее подтверждение.</p><div  class="lecture_mark" id="mark_160"></div><p  id="id_164">Поскольку мы показали ранее, как из <span class="keyword">семафоров</span> построить <span class="keyword">мониторы</span>, 
+      мы доказали эквивалентность <span class="keyword">мониторов</span>, <span class="keyword">семафоров</span> и сообщений.</p><div  class="lecture_mark" id="mark_164"></div><h3 >Заключение</h3><p  id="id_165">Для организации синхронизации процессов могут применяться специальные 
+   <span class="keyword">механизмы</span> высокого уровня, блокирующие процесс, ожидающий входа в критическую 
+   секцию или наступления своей очереди для использования совместного ресурса. 
+   К таким механизмам относятся, например, <span class="keyword">семафоры</span>, <span class="keyword">мониторы</span> и сообщения. Все 
+   эти конструкции являются эквивалентными, т. е., используя любую из них, 
+   можно реализовать две оставшиеся.</p><div  class="lecture_mark" id="mark_165"></div><table  border="0" cellpadding="0" cellspacing="0" width="100%"><tr><td height="4"><img src="6. Механизмы синхронизации_files/empty000.gif" width="1" height="4"></td></tr><tr><td class="orang"><img src="6. Механизмы синхронизации_files/empty000.gif" width="1" height="1" border="0"></td></tr><tr><td height="8"><img src="6. Механизмы синхронизации_files/empty000.gif" width="1" height="8"></td></tr></table>
+
+
+         
+        <a  name="footnote.1"></a><span  class="objectName"><sup>1)</sup></span>
+         
+        В некоторых русских изданиях их еще называют переменными состояния.
+
+
+	</td>
+	</tr>
+	<tr><td height="8"><img src="6. Механизмы синхронизации_files/empty000.gif" width="1" height="8"></td></tr>
+	</table>
+	<!-- /content -->
+
+</td>
+<td><img src="6. Механизмы синхронизации_files/empty000.gif" width="8" height="1"></td>
+</tr>
+</table>
+<!-- /bottom -->
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr><td class="orang" height="1"><img src="6. Механизмы синхронизации_files/empty000.gif" width="1" height="1"></td></tr>
+<td class="ltxt" align=center>&copy; INTUIT.ru, 2003-2008. Все права защищены.</td>
+</tr>
+</table>
+<!-- /bottom -->
+
+<script src="6. Механизмы синхронизации_files/urchin00.js" type="text/javascript">
+</script>
+<script type="text/javascript">
+_uacct = "UA-3475067-1";
+urchinTracker();
+</script></body>
+</html>
+
+
+<!-- This document saved from http://www.intuit.ru/department/os/osintro/6/osintro_6.html -->

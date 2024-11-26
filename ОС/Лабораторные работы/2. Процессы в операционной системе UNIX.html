@@ -1,0 +1,281 @@
+
+<!-- saved from url=(0075)http://www.intuit.ru/department/os/osintropractice/2/osintropractice_2.html -->
+<HTML><HEAD><META http-equiv="Content-Type" content="text/html; charset=windows-1251">
+
+<TITLE>INTUIT.ru::Интернет-Университет Информационных Технологий</TITLE>
+<LINK href="./2. Процессы в операционной системе UNIX_files/printable.css" type="text/css" rel="stylesheet">
+</HEAD><BODY leftmargin="6" topmargin="6" marginheight="6" marginwidth="6">
+
+<DIV align="left">
+<SPAN style="color: #000000; font-weight: bold;">
+&nbsp;&nbsp;
+<SPAN style="font-size:12pt;">Интернет-Университет Информационных Технологий</SPAN>
+</SPAN>
+</DIV>
+
+&nbsp;&nbsp;
+<SPAN align="rright" style="color: #330066; text-decoration:underline;">http://www.INTUIT.ru</SPAN>
+
+
+<TABLE border="0" cellpadding="0" cellspacing="0" width="100%">
+<TBODY><TR><TD height="8" colspan="3"><IMG src="./2. Процессы в операционной системе UNIX_files/empty.gif" width="1" height="8"></TD></TR>
+<TR><TD class="orang" height="1" colspan="3"><IMG src="./2. Процессы в операционной системе UNIX_files/empty.gif" width="1" height="1"></TD></TR>
+<TR><TD height="8" colspan="3"><IMG src="./2. Процессы в операционной системе UNIX_files/empty.gif" width="1" height="8"></TD></TR>
+<TR valign="top">
+<TD><IMG src="./2. Процессы в операционной системе UNIX_files/empty.gif" width="8" height="1"></TD>
+<TD>
+	<!-- content -->
+	<TABLE border="0" cellpadding="0" cellspacing="0" width="100%">
+	<TBODY><TR><TD class="head">Основы операционных систем. Практикум</TD></TR>
+<TR><TD height="4"><IMG src="./2. Процессы в операционной системе UNIX_files/empty.gif" width="1" height="4"></TD></TR>
+	<TR><TD class="orang" height="1"><IMG src="./2. Процессы в операционной системе UNIX_files/empty.gif" width="1" height="1"></TD></TR>
+	<TR><TD height="8"><IMG src="./2. Процессы в операционной системе UNIX_files/empty.gif" width="1" height="8"></TD></TR>
+	<TR><TD><SPAN class="headsub">
+
+
+2. Лекция:
+
+ Процессы в операционной системе UNIX: версия для печати и PDA</SPAN>
+
+<BR>
+<SPAN class="rtxt">Понятие процесса в UNIX, его контекст. Идентификация процесса. Состояния процесса. Краткая диаграмма состояний. Иерархия процессов. Системные вызовы getpid(), getppid(). Создание процесса в UNIX. Системный вызов fork(). Завершение процесса. Функция exit(). Параметры функции main() в языке С. Переменные среды и аргументы командной строки. Изменение пользовательского контекста процесса. Семейство функций для системного вызова exec().
+</SPAN>
+
+</TD></TR>
+
+	<TR><TD height="8"><IMG src="./2. Процессы в операционной системе UNIX_files/empty.gif" width="1" height="8"></TD></TR>
+	<TR><TD class="orang" height="1"><IMG src="./2. Процессы в операционной системе UNIX_files/empty.gif" width="1" height="1"></TD></TR>
+	<TR><TD height="8"><IMG src="./2. Процессы в операционной системе UNIX_files/empty.gif" width="1" height="8"></TD></TR>
+	<TR><TD>
+
+
+<A name="sect1"></A><H3>Понятие процесса в UNIX. Его контекст</H3><P id="id_1">Все построение операционной системы UNIX основано на использовании концепции процессов, которая обсуждалась на лекции. Контекст процесса складывается из <SPAN class="keyword">пользовательского контекста</SPAN> и <SPAN class="keyword">контекста ядра</SPAN>, как изображено на <A href="http://www.intuit.ru/department/os/osintropractice/2/osintropractice_2.html#image.3-4.1">рисунке 3-4.1</A>.</P><DIV class="lecture_mark" id="mark_1"></DIV><P id="id_2"><A name="keyword-context.1"></A>Под <SPAN class="keyword_def">пользовательским контекстом процесса</SPAN> понимают код и данные, расположенные в адресном пространстве процесса. Все данные подразделяются на:</P><DIV class="lecture_mark" id="mark_2"></DIV><UL id="id_3"><LI>инициализируемые неизменяемые данные (например, константы);</LI><LI>инициализируемые изменяемые данные (все переменные, начальные значения которых присваиваются на этапе компиляции);</LI><LI>неинициализируемые изменяемые данные (все статические переменные, которым не присвоены начальные значения на этапе компиляции);</LI><LI>стек пользователя;</LI><LI>данные, расположенные в динамически выделяемой памяти (например, с помощью стандартных библиотечных C функций <SPAN class="texample">malloc()</SPAN>, <SPAN class="texample">calloc()</SPAN>, <SPAN class="texample">realloc()</SPAN>).</LI></UL><DIV class="lecture_mark" id="mark_3"></DIV><P id="id_12">Исполняемый код и инициализируемые данные составляют содержимое файла программы, который исполняется в контексте процесса. Пользовательский стек применяется при работе процесса в пользовательском режиме (user-mode).</P><DIV class="lecture_mark" id="mark_12"></DIV><P align="left" id="id_13"><A name="image.3-4.1"></A></P><DIV><IMG src="./2. Процессы в операционной системе UNIX_files/3-4-1.gif" alt="Контекст процесса в UNIX" width="447" height="372"></DIV><BR><B>Рис. 3-4.1.</B>&nbsp;
+        Контекст процесса в UNIX<P></P><DIV class="lecture_mark" id="mark_13"></DIV><P id="id_14"><A name="keyword-context.2"></A>Под понятием <SPAN class="keyword_def">"контекст ядра"</SPAN> объединяются системный контекст и регистровый контекст, рассмотренные на лекции. Мы будем выделять в <SPAN class="keyword">контексте ядра</SPAN> стек ядра, который используется при работе процесса в режиме ядра (kernel mode), и данные ядра, хранящиеся в структурах, являющихся аналогом блока управления процессом — PCB. Состав данных ядра будет уточняться на последующих семинарах. На этом занятии нам достаточно знать, что в данные ядра входят: идентификатор пользователя — <SPAN class="texample">UID</SPAN>, групповой идентификатор пользователя — <SPAN class="texample">GID</SPAN>, <SPAN class="keyword">идентификатор процесса</SPAN> — <SPAN class="keyword">PID</SPAN>, <SPAN class="keyword">идентификатор родительского процесса</SPAN> — <SPAN class="keyword">PPID</SPAN>.  </P><DIV class="lecture_mark" id="mark_14"></DIV><A name="sect2"></A><H3>Идентификация процесса</H3><P id="id_17"><A name="keyword-context.3"></A><A name="keyword-context.4"></A>Каждый процесс в операционной системе получает уникальный <SPAN class="keyword_def">идентификационный номер</SPAN> – <SPAN class="keyword_def">PID (process identificator)</SPAN>. При создании нового процесса операционная система пытается присвоить ему свободный номер больший, чем у процесса, созданного перед ним. Если таких свободных номеров не оказывается (например, мы достигли максимально возможного номера для процесса), то операционная система выбирает минимальный номер из всех свободных номеров. В операционной системе Linux присвоение <SPAN class="keyword">идентификационных номеров процессов</SPAN> начинается с номера 0, который получает процесс <SPAN class="texample">kernel</SPAN> при старте операционной системы. Этот номер впоследствии не может быть присвоен никакому другому процессу. Максимально возможное значение для номера процесса в Linux на базе 32-разрядных процессоров Intel составляет 2<SUP>31</SUP>-1. </P><DIV class="lecture_mark" id="mark_17"></DIV><A name="sect3"></A><H3>Состояния процесса. Краткая диаграмма состояний</H3><P id="id_19">Модель состояний процессов в операционной системе UNIX представляет собой детализацию модели состояний, принятой в лекционном курсе. Краткая диаграмма состояний процессов в операционной системе UNIX изображена на <A href="http://www.intuit.ru/department/os/osintropractice/2/osintropractice_2.html#image.3-4.2">рисунке 3-4.2</A>.</P><DIV class="lecture_mark" id="mark_19"></DIV><P align="left" id="id_20"><A name="image.3-4.2"></A></P><DIV><IMG src="./2. Процессы в операционной системе UNIX_files/3-4-2.gif" alt="Сокращенная диаграмма состояний процесса в UNIX" width="447" height="298"></DIV><BR><B>Рис. 3-4.2.</B>&nbsp;
+        Сокращенная диаграмма состояний процесса в UNIX<P></P><DIV class="lecture_mark" id="mark_20"></DIV><P id="id_21">Как мы видим, состояние процесса <B>исполнение</B> расщепилось на два состояния: <SPAN class="keyword">исполнение в режиме ядра</SPAN> и <SPAN class="keyword">исполнение в режиме пользователя</SPAN>. <A name="keyword-context.5"></A>В состоянии <SPAN class="keyword_def">исполнение в режиме пользователя</SPAN> процесс выполняет прикладные инструкции пользователя. <A name="keyword-context.6"></A>В состоянии <SPAN class="keyword_def">исполнение в режиме ядра</SPAN> выполняются инструкции ядра операционной системы в контексте текущего процесса (например, при обработке системного вызова или прерывания). Из состояния <SPAN class="keyword">исполнение в режиме пользователя</SPAN> процесс не может непосредственно перейти в состояния <B>ожидание</B>, <B>готовность</B> и <B>закончил исполнение</B>. Такие переходы возможны только через промежуточное состояние <SPAN class="keyword">"исполняется в режиме ядра"
+</SPAN>. Также запрещен прямой переход из состояния <B>готовность</B> в состояние  <SPAN class="keyword">исполнение в режиме пользователя</SPAN>.</P><DIV class="lecture_mark" id="mark_21"></DIV><P id="id_22">Приведенная выше диаграмма состояний процессов в UNIX не является полной. Она показывает только состояния, для понимания которых достаточно уже полученных знаний. Пожалуй, наиболее полную диаграмму состояний процессов в операционной системе UNIX можно найти в книге <A target="_blank" href="http://www.intuit.ru/department/os/osintropractice/popup.lit.html#1">[1]</A> (рисунок 6.1.).</P><DIV class="lecture_mark" id="mark_22"></DIV><A name="sect4"></A><H3>Иерархия процессов</H3><P id="id_23">В операционной системе UNIX все процессы, кроме одного, создающегося при старте операционной системы, могут быть порождены только какими-либо другими процессами. В качестве прародителя всех остальных процессов в подобных UNIX системах могут выступать процессы с номерами <SPAN class="texample">1</SPAN> или <SPAN class="texample">0</SPAN>. В операционной системе Linux таким родоначальником, существующим только при загрузке системы, является процесс <SPAN class="texample">kernel</SPAN> с идентификатором <SPAN class="texample">0</SPAN>.</P><DIV class="lecture_mark" id="mark_23"></DIV><P id="id_28">Таким образом, все процессы в UNIX связаны отношениями процесс-родитель – процесс-ребенок и образуют генеалогическое дерево процессов. Для сохранения целостности генеалогического дерева в ситуациях, когда процесс-родитель завершает свою работу до завершения выполнения процесса-ребенка, <SPAN class="keyword">идентификатор родительского процесса</SPAN> в данных ядра процесса-ребенка <SPAN class="keyword">(PPID – parent process identificator)</SPAN> изменяет свое значение на значение <SPAN class="texample">1</SPAN>, соответствующее <SPAN class="keyword">идентификатору процесса </SPAN> <SPAN class="texample"> init</SPAN>, время жизни которого определяет время функционирования операционной системы. Тем самым процесс <SPAN class="texample">init</SPAN> как бы усыновляет осиротевшие процессы. Наверное, логичнее было бы заменять <SPAN class="keyword">PPID</SPAN> не на значение <SPAN class="texample">1</SPAN>, а на значение идентификатора ближайшего существующего процесса-прародителя умершего процесса-родителя, 
+но в UNIX почему-то такая схема реализована не была.</P><DIV class="lecture_mark" id="mark_28"></DIV><A name="sect5"></A><H3>Системные вызовы getppid() и getpid()</H3><P id="id_33">Данные ядра, находящиеся в <SPAN class="keyword">контексте ядра</SPAN> процесса, не могут быть прочитаны процессом непосредственно. Для получения информации о них процесс должен совершить соответствующий системный вызов. <A name="keyword-context.7"></A>Значение идентификатора текущего процесса может быть получено с помощью системного вызова <SPAN class="texample"><SPAN class="keyword_def">getpid()</SPAN></SPAN>, а <A name="keyword-context.8"></A>значение идентификатора родительского процесса для текущего процесса – с помощью системного вызова <SPAN class="texample"><SPAN class="keyword">getppid()</SPAN></SPAN>. Прототипы этих системных вызовов и соответствующие типы данных описаны в системных файлах <SPAN class="texample">&lt;sys/types.h&gt;</SPAN> и <SPAN class="texample">&lt;unistd.h&gt;</SPAN>. Системные вызовы не имеют параметров и возвращают <SPAN class="keyword">идентификатор текущего процесса</SPAN> и <SPAN class="keyword">идентификатор родительского процесса</SPAN> соответственно.</P><DIV class="lecture_mark" id="mark_33"></DIV><DIV class="xml_table_env" id="id_38"><A name=""></A><TABLE border="0" class="xml_table" cellpadding="2" cellspacing="1"><TBODY><TR><TD bgcolor="#eaeaea" valign="top">
+
+<P id="id_39"><B>Системные вызовы getpid() и getppid()</B></P><DIV class="lecture_mark" id="mark_39"></DIV>
+
+<P id="id_40"><B>Прототипы системных вызовов</B></P><DIV class="lecture_mark" id="mark_40"></DIV>
+
+<DIV class="example"><PRE>#include &lt;sys/types.h&gt;
+#include &lt;unistd.h&gt;
+pid_t getpid(void);
+pid_t getppid(void);
+</PRE></DIV>
+
+<P id="id_42"><B>Описание системных вызовов</B></P><DIV class="lecture_mark" id="mark_42"></DIV>
+
+<P id="id_43">Системный вызов <SPAN class="texample"><SPAN class="keyword">getpid</SPAN></SPAN> возвращает идентификатор текущего процесса.</P><DIV class="lecture_mark" id="mark_43"></DIV>
+
+<P id="id_45">Системный вызов <SPAN class="texample"><SPAN class="keyword">getppid</SPAN></SPAN> возвращает идентификатор процесса-родителя для текущего процесса.</P><DIV class="lecture_mark" id="mark_45"></DIV>
+
+<P id="id_47">Тип данных <SPAN class="texample">pid_t</SPAN> является синонимом для одного из целочисленных типов языка C.</P><DIV class="lecture_mark" id="mark_47"></DIV>
+
+</TD></TR></TBODY></TABLE></DIV><DIV class="lecture_mark" id="mark_38"></DIV><A name="sect6"></A><H3>Написание программы с использованием getpid() и getppid()</H3><P id="id_49">В качестве примера использования системных вызовов <SPAN class="texample"><SPAN class="keyword">getpid()</SPAN></SPAN> и <SPAN class="texample"><SPAN class="keyword">getppid()</SPAN></SPAN> самостоятельно напишите программу, печатающую значения <SPAN class="texample"><SPAN class="keyword">PID</SPAN></SPAN> и <SPAN class="texample"><SPAN class="keyword">PPID</SPAN></SPAN> для текущего процесса. Запустите ее несколько раз подряд. Посмотрите, как меняется идентификатор текущего процесса. Объясните наблюдаемые изменения.</P><DIV class="lecture_mark" id="mark_49"></DIV><A name="sect7"></A><H3>Создание процесса в UNIX. Системный вызов fork()</H3><P id="id_54"><A name="keyword-context.9"></A>В операционной системе UNIX новый процесс может быть порожден единственным способом – с помощью системного вызова <SPAN class="texample"><SPAN class="keyword_def">fork()</SPAN></SPAN>. При этом вновь созданный процесс будет являться практически полной копией родительского процесса. У порожденного процесса по сравнению с родительским процессом (на уровне уже полученных знаний) изменяются значения следующих параметров:</P><DIV class="lecture_mark" id="mark_54"></DIV><UL id="id_56"><LI><SPAN class="keyword">идентификатор процесса</SPAN> – <SPAN class="texample"><SPAN class="keyword">PID</SPAN></SPAN>;</LI><LI><SPAN class="keyword">идентификатор родительского процесса</SPAN> – <SPAN class="texample"><SPAN class="keyword">PPID</SPAN></SPAN>.</LI></UL><DIV class="lecture_mark" id="mark_56"></DIV><P id="id_61">Дополнительно может измениться поведение порожденного процесса по отношению к некоторым сигналам, о чем подробнее будет рассказано на семинарах 13–14, когда мы будем говорить о сигналах в операционной системе UNIX.</P><DIV class="lecture_mark" id="mark_61"></DIV><DIV class="xml_table_env" id="id_62"><A name=""></A><TABLE border="0" class="xml_table" cellpadding="2" cellspacing="1"><TBODY><TR><TD bgcolor="#eaeaea" valign="top">
+
+<P id="id_63"><B>Системный вызов для порождения нового процесса</B></P><DIV class="lecture_mark" id="mark_63"></DIV>
+
+<P id="id_64"><B>Прототип системного вызова</B></P><DIV class="lecture_mark" id="mark_64"></DIV>
+
+<DIV class="example"><PRE>#include &lt;sys/types.h&gt;
+#include &lt;unistd.h&gt;
+pid_t fork(void);
+</PRE></DIV>
+
+<P id="id_66"><B>Описание системного вызова</B></P><DIV class="lecture_mark" id="mark_66"></DIV>
+
+<P id="id_67">Системный вызов <SPAN class="texample"><SPAN class="keyword">fork</SPAN></SPAN> служит для создания нового процесса в операционной системе UNIX. Процесс, который инициировал системный вызов <SPAN class="texample"><SPAN class="keyword">fork</SPAN></SPAN>, принято называть родительским процессом (<SPAN class="texample">parent process</SPAN>). Вновь порожденный процесс принято называть процессом-ребенком (<SPAN class="texample">child process</SPAN>). Процесс-ребенок является почти полной копией родительского процесса. У порожденного процесса по сравнению с родительским изменяются значения следующих параметров:</P><DIV class="lecture_mark" id="mark_67"></DIV>
+
+<UL id="id_72"><LI>идентификатор процесса;</LI><LI>идентификатор родительского процесса;</LI><LI>время, оставшееся до получения сигнала <SPAN class="texample">SIGALRM</SPAN>;</LI><LI>сигналы, ожидавшие доставки родительскому процессу, не будут доставляться порожденному процессу.</LI></UL><DIV class="lecture_mark" id="mark_72"></DIV>
+
+<P id="id_78">При однократном системном вызове возврат из него может произойти дважды: один раз в родительском процессе, а второй раз в порожденном процессе. Если создание нового процесса произошло успешно, то в порожденном процессе системный вызов вернет значение <SPAN class="texample">0</SPAN>, а в родительском процессе – положительное значение, равное идентификатору процесса-ребенка. Если создать новый процесс не удалось, то системный вызов вернет в инициировавший его процесс отрицательное значение.</P><DIV class="lecture_mark" id="mark_78"></DIV>
+
+<P id="id_80">Системный вызов <SPAN class="texample"><SPAN class="keyword">fork</SPAN></SPAN> является единственным способом породить новый процесс после инициализации операционной системы UNIX.</P><DIV class="lecture_mark" id="mark_80"></DIV>
+
+</TD></TR></TBODY></TABLE></DIV><DIV class="lecture_mark" id="mark_62"></DIV><P id="id_82">В процессе выполнения системного вызова <SPAN class="texample"><SPAN class="keyword">fork()</SPAN></SPAN> порождается копия родительского процесса и возвращение из системного вызова будет происходить уже как в родительском, так и в порожденном процессах. Этот системный вызов является единственным, который вызывается один раз, а при успешной работе возвращается два раза (один раз в процессе-родителе и один раз в процессе-ребенке)! После выхода из системного вызова оба процесса продолжают выполнение регулярного пользовательского кода, следующего за системным вызовом.</P><DIV class="lecture_mark" id="mark_82"></DIV><A name="sect8"></A><H3>Прогон программы с fork() с одинаковой работой родителя и ребенка</H3><P id="id_84">Для иллюстрации сказанного давайте рассмотрим следующую программу:</P><DIV class="lecture_mark" id="mark_84"></DIV><A name="example.3.1"></A><DIV class="example"><PRE>/* Программа 03-1.с – пример создания нового
+   процесса с одинаковой работой процессов 
+   ребенка и родителя */ 
+
+#include &lt;sys/types.h&gt;
+#include &lt;unistd.h&gt;
+#include &lt;stdio.h&gt;
+int main()
+{
+    pid_t pid, ppid;
+    int a = 0; 
+    (void)fork();
+
+    /* При успешном создании нового процесса
+       с этого места псевдопараллельно 
+       начинают работать два процесса: старый
+       и новый */
+    /* Перед выполнением следующего выражения 
+       значение переменной a в обоих процессах
+       равно 0 */
+
+    a = a+1;
+
+    /* Узнаем идентификаторы текущего и роди-
+       тельского процесса (в каждом из 
+       процессов !!!) */
+
+    pid = getpid();
+    ppid = getppid();
+
+    /* Печатаем значения PID, PPID и вычислен-
+       ное значение переменной a (в каждом из
+       процессов !!!) */
+    printf("My pid = %d, my ppid = %d, 
+      result = %d\n", (int)pid, (int)ppid, a);
+    return 0;
+} 
+</PRE><SPAN class="objectName">
+            Листинг 
+            3.1.
+            Программа 03-1.с – пример создания нового процесса с одинаковой работой процессов ребенка и родителя.</SPAN></DIV><P id="id_86">Наберите эту программу, откомпилируйте ее и запустите на исполнение (лучше всего это делать не из оболочки <SPAN class="texample">mc</SPAN>, так как она не очень корректно сбрасывает буферы ввода-вывода). Проанализируйте полученный результат.</P><DIV class="lecture_mark" id="mark_86"></DIV><A name="sect9"></A><H3>Системный вызов fork() (продолжение)</H3><P id="id_88">Для того чтобы после возвращения из системного вызова <SPAN class="texample"><SPAN class="keyword">fork()</SPAN></SPAN> процессы могли определить, кто из них является ребенком, а кто родителем, и, соответственно, по-разному организовать свое поведение, системный вызов возвращает в них разные значения. При успешном создании нового процесса в процесс-родитель возвращается положительное значение, равное идентификатору процесса-ребенка. В процесс-ребенок же возвращается значение <SPAN class="texample">0</SPAN>. Если по какой-либо причине создать новый процесс не удалось, то системный вызов вернет в инициировавший его процесс значение <SPAN class="texample">-1</SPAN>. Таким образом, общая схема организации различной работы процесса-ребенка и процесса-родителя выглядит так:</P><DIV class="lecture_mark" id="mark_88"></DIV><DIV class="example"><PRE>pid = fork();
+if(pid == -1){
+    ...
+    /* ошибка */
+    ...
+} else if (pid == 0){
+    ...
+    /* ребенок */
+    ...
+} else {
+    ...
+    /* родитель */
+    ...
+}
+</PRE></DIV><A name="sect10"></A><H3>Написание, компиляция и запуск программы с использованием вызова fork() с разным поведением процессов ребенка и родителя</H3><P id="id_93">Измените предыдущую программу с <SPAN class="texample"><SPAN class="keyword">fork()</SPAN></SPAN> так, чтобы родитель и ребенок совершали разные действия (какие – не важно).</P><DIV class="lecture_mark" id="mark_93"></DIV><A name="sect11"></A><H3>Завершение процесса. Функция exit() </H3><P id="id_95">Существует два способа корректного завершения процесса в программах, написанных на языке C. Первый способ мы использовали до сих пор: процесс корректно завершался по достижении конца функции <SPAN class="texample">main()</SPAN> или при выполнении оператора <SPAN class="texample">return</SPAN> в функции <SPAN class="texample">main()</SPAN>, второй способ применяется при необходимости завершить процесс в каком-либо другом месте программы. Для этого используется функция <SPAN class="texample"><SPAN class="keyword_def">exit()</SPAN></SPAN> из стандартной библиотеки функций для языка C. <A name="keyword-context.10"></A>При выполнении этой функции происходит сброс всех частично заполненных буферов ввода-вывода с закрытием соответствующих потоков, после чего инициируется системный вызов прекращения работы процесса и перевода его в состояние <B>закончил исполнение</B>.<SPAN class="keyword"></SPAN> </P><DIV class="lecture_mark" id="mark_95"></DIV><P id="id_100">Возврата из функции в текущий процесс не происходит и функция ничего не возвращает.</P><DIV class="lecture_mark" id="mark_100"></DIV><P id="id_101">Значение параметра функции <SPAN class="texample"><SPAN class="keyword">exit()</SPAN></SPAN> – кода завершения процесса – передается ядру операционной системы и может быть затем получено процессом, породившим завершившийся процесс. На самом деле при достижении конца функции <SPAN class="texample">main()</SPAN> также неявно вызывается эта функция со значением параметра <SPAN class="texample">0</SPAN>. </P><DIV class="lecture_mark" id="mark_101"></DIV><DIV class="xml_table_env" id="id_105"><A name=""></A><TABLE border="0" class="xml_table" cellpadding="2" cellspacing="1"><TBODY><TR><TD bgcolor="#eaeaea" valign="top">
+
+<P id="id_106"><B>Функция для нормального завершения процесса</B></P><DIV class="lecture_mark" id="mark_106"></DIV>
+
+<P id="id_107"><B>Прототип функции</B></P><DIV class="lecture_mark" id="mark_107"></DIV>
+
+<DIV class="example"><PRE>#include &lt;stdlib.h&gt;
+void exit(int status);
+</PRE></DIV>
+
+<P id="id_109"><B>Описание функции</B></P><DIV class="lecture_mark" id="mark_109"></DIV>
+
+<P id="id_110">Функция <SPAN class="texample"><SPAN class="keyword">exit</SPAN></SPAN> служит для нормального завершения процесса. При выполнении этой функции происходит сброс всех частично заполненных буферов ввода-вывода с закрытием соответствующих потоков (файлов, pipe, FIFO, сокетов), после чего инициируется системный вызов прекращения работы процесса и перевода его в состояние закончил исполнение.</P><DIV class="lecture_mark" id="mark_110"></DIV>
+
+<P id="id_112">Возврата из функции в текущий процесс не происходит, и функция ничего не возвращает.</P><DIV class="lecture_mark" id="mark_112"></DIV>
+
+<P id="id_113">Значение параметра <SPAN class="texample">status</SPAN> – кода завершения процесса – передается ядру операционной системы и может быть затем получено процессом, породившим завершившийся процесс. При этом используются только младшие 8 бит параметра, так что для кода завершения допустимы значения от <SPAN class="texample">0</SPAN> до <SPAN class="texample">255</SPAN>. По соглашению, код завершения <SPAN class="texample">0</SPAN> означает безошибочное завершение процесса.</P><DIV class="lecture_mark" id="mark_113"></DIV>
+
+</TD></TR></TBODY></TABLE></DIV><DIV class="lecture_mark" id="mark_105"></DIV><P id="id_118">Если процесс завершает свою работу раньше, чем его родитель, и родитель явно не указал, что он не хочет получать информацию о статусе <SPAN class="keyword">завершения порожденного процесса</SPAN> (об этом будет рассказано подробнее на семинарах 13–14 при изучении сигналов), то завершившийся процесс не исчезает из системы окончательно, а остается в состоянии <B>закончил исполнение</B> либо до завершения процесса-родителя, либо до того момента, когда родитель получит эту информацию. Процессы, находящиеся в состоянии <B>закончил исполнение</B>, в операционной системе UNIX принято называть процессами-зомби (<SPAN class="texample">zombie</SPAN>, <SPAN class="texample">defunct</SPAN>). </P><DIV class="lecture_mark" id="mark_118"></DIV><A name="sect12"></A><H3>Параметры функции main() в языке C. Переменные среды и аргументы командной строки</H3><P id="id_121">У функции <SPAN class="texample">main()</SPAN> в языке программирования C существует три <SPAN class="keyword">параметра</SPAN>, которые могут быть переданы ей операционной системой. Полный прототип функции <SPAN class="texample">main()</SPAN> выглядит следующим образом:</P><DIV class="lecture_mark" id="mark_121"></DIV><DIV class="example"><PRE>int main(int argc, char *argv[], 
+         char *envp[]); 
+</PRE></DIV><P id="id_125">Первые два <SPAN class="keyword">параметра</SPAN> при запуске программы на исполнение командной строкой позволяют узнать полное содержание командной строки. Вся командная строка рассматривается как набор слов, разделенных пробелами. Через параметр <SPAN class="texample"><SPAN class="keyword">argc</SPAN></SPAN> передается количество слов в командной строке, которой была запущена программа. Параметр <SPAN class="texample"><SPAN class="keyword">argv</SPAN></SPAN> является массивом указателей на отдельные слова. Так, например, если программа была запущена командой </P><DIV class="lecture_mark" id="mark_125"></DIV><DIV class="example"><PRE>a.out 12 abcd
+</PRE></DIV><P id="id_129">то значение параметра <SPAN class="texample"><SPAN class="keyword">argc</SPAN></SPAN> будет равно <SPAN class="texample">3</SPAN>, <SPAN class="texample">argv[0]</SPAN> будет указывать на имя программы — первое слово — <SPAN class="texample">"a.out"</SPAN>, <SPAN class="texample">argv[1]</SPAN> — на слово <SPAN class="texample">"12"</SPAN>,  <SPAN class="texample">argv[2]</SPAN> — на слово <SPAN class="texample">"abcd"</SPAN>. Так как имя программы всегда присутствует на первом месте в командной строке, то <SPAN class="texample">argc</SPAN> всегда больше <SPAN class="texample">0</SPAN>, а <SPAN class="texample">argv[0]</SPAN> всегда указывает на имя запущенной программы.</P><DIV class="lecture_mark" id="mark_129"></DIV><P id="id_141">Анализируя в программе <SPAN class="keyword">содержимое командной строки</SPAN>, мы можем предусмотреть ее различное поведение в зависимости от слов, следующих за именем программы. Таким образом, не внося изменений в текст программы, мы можем заставить ее работать по-разному от запуска к запуску. Например, компилятор <SPAN class="texample">gcc</SPAN>, вызванный командой <SPAN class="texample">gcc 1.c</SPAN> будет генерировать исполняемый файл с именем <SPAN class="texample">a.out</SPAN>, а при вызове командой <SPAN class="texample">gcc 1.c –o 1.exe</SPAN> – файл с именем <SPAN class="texample">1.exe</SPAN>.</P><DIV class="lecture_mark" id="mark_141"></DIV><P id="id_147">Третий параметр – <SPAN class="texample"><SPAN class="keyword">envp</SPAN></SPAN> – является массивом указателей на параметры окружающей среды процесса. Начальные параметры окружающей среды процесса задаются в специальных конфигурационных файлах для каждого пользователя и устанавливаются при входе пользователя в систему. В дальнейшем они могут быть изменены с помощью специальных команд операционной системы UNIX. Каждый параметр имеет вид: <SPAN class="texample">переменная=строка</SPAN>. Такие переменные используются для изменения долгосрочного поведения процессов, в отличие от <SPAN class="keyword">аргументов командной строки</SPAN>. Например, задание параметра <SPAN class="texample">TERM=vt100</SPAN> может говорить процессам, осуществляющим вывод на экран дисплея, что работать им придется с терминалом <SPAN class="texample">vt100</SPAN>. Меняя значение <SPAN class="keyword">переменной среды </SPAN><SPAN class="texample"> TERM</SPAN>, например на <SPAN class="texample">TERM=console</SPAN>, мы сообщаем таким процессам, 
+что они должны изменить свое поведение и осуществлять вывод для системной консоли.</P><DIV class="lecture_mark" id="mark_147"></DIV><P id="id_154">Размер массива <SPAN class="keyword">аргументов командной строки</SPAN> в функции <SPAN class="texample"><SPAN class="keyword">main()</SPAN></SPAN> мы получали в качестве ее параметра. Так как для массива ссылок на параметры окружающей среды такого параметра нет, то его размер определяется другим способом. Последний элемент этого массива содержит указатель <SPAN class="texample">NULL</SPAN>. </P><DIV class="lecture_mark" id="mark_154"></DIV><A name="sect13"></A><H3>Написание, компиляция и запуск программы, распечатывающей аргументы командной строки и параметры среды</H3><P id="id_157">В качестве примера самостоятельно напишите программу, распечатывающую значения <SPAN class="keyword">аргументов командной строки</SPAN> и параметров окружающей среды для текущего процесса.</P><DIV class="lecture_mark" id="mark_157"></DIV><A name="sect14"></A><H3>Изменение пользовательского контекста процесса. Семейство функций для системного вызова exec()</H3><P id="id_158"><A name="keyword-context.11"></A>Для изменения <SPAN class="keyword">пользовательского контекста процесса</SPAN> применяется системный вызов <SPAN class="texample"><SPAN class="keyword_def">exec()</SPAN></SPAN>, который пользователь не может вызвать непосредственно. Вызов <SPAN class="texample"><SPAN class="keyword">exec()</SPAN></SPAN> заменяет <SPAN class="keyword">пользовательский контекст текущего процесса</SPAN> на содержимое некоторого исполняемого файла и устанавливает начальные значения регистров процессора (в том числе устанавливает программный счетчик на начало загружаемой программы). Этот вызов требует для своей работы задания имени исполняемого файла, аргументов командной строки и параметров окружающей среды. Для осуществления вызова программист может воспользоваться одной из шести функций: <SPAN class="texample"><SPAN class="keyword">execlp()</SPAN></SPAN>, <SPAN class="texample"><SPAN class="keyword">execvp()</SPAN></SPAN>, <SPAN class="texample"><SPAN class="keyword">execl()</SPAN></SPAN> и, <SPAN class="texample"><SPAN class="keyword">execv()</SPAN></SPAN>, <SPAN class="texample"><SPAN class="keyword">execle()</SPAN></SPAN>, <SPAN class="texample"><SPAN class="keyword">execve()</SPAN></SPAN>, отличающихся друг от друга представлением параметров, необходимых для работы системного вызова <SPAN class="texample"><SPAN class="keyword">exec()</SPAN></SPAN>. Взаимосвязь указанных выше функций изображена на <A href="http://www.intuit.ru/department/os/osintropractice/2/osintropractice_2.html#image.3-4.3">рисунке 3–4.3</A>. </P><DIV class="lecture_mark" id="mark_158"></DIV><P align="left" id="id_168"><A name="image.3-4.3"></A></P><DIV><IMG src="./2. Процессы в операционной системе UNIX_files/3-4-3.gif" alt="Взаимосвязь различных функций для  выполнения системного вызова exec()" width="447" height="184"></DIV><BR><B>Рис. 3-4.3.</B>&nbsp;
+        Взаимосвязь различных функций для  выполнения системного вызова exec()<P></P><DIV class="lecture_mark" id="mark_168"></DIV><DIV class="xml_table_env" id="id_169"><A name=""></A><TABLE border="0" class="xml_table" cellpadding="2" cellspacing="1"><TBODY><TR><TD bgcolor="#eaeaea" valign="top">
+
+<P id="id_170"><B>Функции изменения пользовательского контекста процесса</B></P><DIV class="lecture_mark" id="mark_170"></DIV>
+
+<P id="id_171"><B>Прототипы функций</B></P><DIV class="lecture_mark" id="mark_171"></DIV>
+
+<DIV class="example"><PRE>#include &lt;unistd.h&gt;
+int execlp(const char *file, 
+    const char *arg0,
+... const char *argN,(char *)NULL)
+int execvp(const char *file, char *argv[])
+int execl(const char *path, 
+    const char *arg0,
+... const char *argN,(char *)NULL)
+int execv(const char *path, char *argv[])
+int execle(const char *path, 
+    const char *arg0,
+... const char *argN,(char *)NULL, 
+    char * envp[])
+int execve(const char *path, char *argv[], 
+    char *envp[])
+</PRE></DIV>
+
+<P id="id_173"><B>Описание функций</B></P><DIV class="lecture_mark" id="mark_173"></DIV>
+
+<P id="id_174">Для загрузки новой программы в системный контекст текущего процесса используется семейство взаимосвязанных функций, отличающихся друг от друга формой представления параметров.</P><DIV class="lecture_mark" id="mark_174"></DIV>
+
+<P id="id_175">Аргумент <SPAN class="texample">file</SPAN> является указателем на имя файла, который должен быть загружен. Аргумент <SPAN class="texample">path</SPAN> – это указатель на полный путь к файлу, который должен быть загружен.</P><DIV class="lecture_mark" id="mark_175"></DIV>
+
+<P id="id_178">Аргументы <SPAN class="texample">arg0, ..., argN</SPAN> представляют собой указатели на аргументы командной строки. Заметим, что аргумент <SPAN class="texample">arg0</SPAN> должен указывать на имя загружаемого файла. Аргумент <SPAN class="texample">argv</SPAN> представляет собой массив из указателей на аргументы командной строки. Начальный элемент массива должен указывать на имя загружаемой программы, а заканчиваться массив должен элементом, содержащим указатель <SPAN class="texample">NULL</SPAN>.</P><DIV class="lecture_mark" id="mark_178"></DIV>
+
+<P id="id_183">Аргумент <SPAN class="texample">envp</SPAN> является массивом указателей на параметры окружающей среды, заданные в виде строк <SPAN class="texample">"переменная=строка"</SPAN>. Последний элемент этого массива должен содержать указатель <SPAN class="texample">NULL</SPAN>.</P><DIV class="lecture_mark" id="mark_183"></DIV>
+
+<P id="id_187">Поскольку вызов функции не изменяет системный контекст текущего процесса, загруженная программа унаследует от загрузившего ее процесса следующие атрибуты:</P><DIV class="lecture_mark" id="mark_187"></DIV>
+
+<UL id="id_188"><LI>идентификатор процесса;</LI><LI>идентификатор родительского процесса;</LI><LI>групповой идентификатор процесса;</LI><LI>идентификатор сеанса;</LI><LI>время, оставшееся до возникновения сигнала <SPAN class="texample">SIGALRM</SPAN>;</LI><LI>текущую рабочую директорию;</LI><LI>маску создания файлов;</LI><LI>идентификатор пользователя;</LI><LI>групповой идентификатор пользователя;</LI><LI>явное игнорирование сигналов;</LI><LI>таблицу открытых файлов (если для файлового дескриптора не устанавливался признак "закрыть файл при выполнении <SPAN class="texample"><SPAN class="keyword">exec()</SPAN></SPAN>").</LI></UL><DIV class="lecture_mark" id="mark_188"></DIV>
+
+<P id="id_202">В случае успешного выполнения возврата из функций в программу, осуществившую вызов, не происходит, а управление передается загруженной программе. В случае неудачного выполнения в программу, инициировавшую вызов, возвращается отрицательное значение.</P><DIV class="lecture_mark" id="mark_202"></DIV>
+
+</TD></TR></TBODY></TABLE></DIV><DIV class="lecture_mark" id="mark_169"></DIV><P id="id_203">Поскольку системный контекст процесса при вызове <SPAN class="texample"><SPAN class="keyword">exec()</SPAN></SPAN> остается практически неизменным, большинство атрибутов процесса, доступных пользователю через системные вызовы (<SPAN class="texample"><SPAN class="keyword">PID</SPAN></SPAN>, <SPAN class="texample">UID</SPAN>, <SPAN class="texample">GID</SPAN>, <SPAN class="texample"><SPAN class="keyword">PPID</SPAN></SPAN> и другие, смысл которых станет понятен по мере углубления наших знаний на дальнейших занятиях), после запуска новой программы также не изменяется.</P><DIV class="lecture_mark" id="mark_203"></DIV><P id="id_209"><B>Важно понимать разницу между системными вызовами</B> <SPAN class="texample"><SPAN class="keyword">fork()</SPAN></SPAN> <B>и</B> <SPAN class="texample"><SPAN class="keyword">exec()</SPAN></SPAN><B>. Системный вызов</B> <SPAN class="texample"><SPAN class="keyword">fork()</SPAN></SPAN> <B>создает новый процесс, у которого пользовательский контекст совпадает с пользовательским контекстом процесса-родителя. Системный вызов</B> <SPAN class="texample"><SPAN class="keyword">exec()</SPAN></SPAN> <B>изменяет пользовательский контекст текущего процесса, не создавая новый процесс.</B></P><DIV class="lecture_mark" id="mark_209"></DIV><A name="sect15"></A><H3>Прогон программы с использованием системного вызова exec()</H3><P id="id_214">Для иллюстрации использования системного вызова <SPAN class="texample"><SPAN class="keyword">exec()</SPAN></SPAN> давайте рассмотрим следующую программу </P><DIV class="lecture_mark" id="mark_214"></DIV><A name="example.3.2"></A><DIV class="example"><PRE>/* Программа 03-2.с, изменяющая пользователь-
+ский контекст процесса (запускающая 
+   другую программу) */
+
+#include &lt;sys/types.h&gt;
+#include &lt;unistd.h&gt;
+#include &lt;stdio.h&gt;
+int main(int argc, char *argv[], 
+         char *envp[]){ 
+
+/* Мы будем запускать команду cat c аргументом
+   командной строки 03-2.с без изменения 
+   параметров среды, т.е. фактически выполнять
+   команду "cat 03-2.c", которая должна выдать
+   содержимое данного файла на экран. Для 
+   функции execle в качестве имени программы 
+   мы указываем ее полное имя с путем от 
+   корневой директории —/bin/cat. 
+
+   Первое слово в командной строке у нас 
+   должно совпадать с именем запускаемой 
+   программы. Второе слово в командной строке
+   – это имя файла, содержимое которого мы 
+   хотим распечатать. */
+
+(void) execle("/bin/cat", "/bin/cat", 
+              "03-2.c", 0, envp);
+
+/* Сюда попадаем только при 
+   возникновении ошибки */
+printf("Error on program start\n");
+exit(-1);
+return 0;     /* Никогда не выполняется, нужен 
+                 для того, чтобы компилятор не
+                 выдавал warning */
+}
+</PRE><SPAN class="objectName">
+            Листинг 
+            3.2.
+            Программа 03-2.с, изменяющая пользовательский контекст процесса</SPAN></DIV><P id="id_217">Откомпилируйте ее и запустите на исполнение. Поскольку при нормальной работе будет распечатываться содержимое файла с именем <SPAN class="texample">03-2.c</SPAN>, такой файл при запуске должен присутствовать в текущей директории (проще всего записать исходный текст программы под этим именем). Проанализируйте результат.</P><DIV class="lecture_mark" id="mark_217"></DIV><A name="sect16"></A><H3>Написание, компиляция и запуск программы для изменения пользовательского контекста в порожденном процессе</H3><P id="id_219">Для закрепления полученных знаний модифицируйте программу, созданную при выполнении задания раздела "Написание, компиляция и запуск программы с использованием вызова <SPAN class="texample"><SPAN class="keyword">fork()</SPAN></SPAN> с разным поведением процессов ребенка и родителя" так, чтобы порожденный процесс запускал на исполнение новую (любую) программу.</P><DIV class="lecture_mark" id="mark_219"></DIV>
+
+
+	</TD>
+	</TR>
+	<TR><TD height="8"><IMG src="./2. Процессы в операционной системе UNIX_files/empty.gif" width="1" height="8"></TD></TR>
+	</TBODY></TABLE>
+	<!-- /content -->
+
+</TD>
+<TD><IMG src="./2. Процессы в операционной системе UNIX_files/empty.gif" width="8" height="1"></TD>
+</TR>
+</TBODY></TABLE>
+<!-- /bottom -->
+<TABLE border="0" cellpadding="0" cellspacing="0" width="100%">
+<TBODY><TR><TD class="orang" height="1"><IMG src="./2. Процессы в операционной системе UNIX_files/empty.gif" width="1" height="1"></TD></TR>
+<TR><TD class="ltxt" align="center">© INTUIT.ru, 2003-2009. Все права защищены.</TD>
+</TR>
+</TBODY></TABLE>
+<!-- /bottom -->
+
+<SCRIPT src="./2. Процессы в операционной системе UNIX_files/urchin.js" type="text/javascript">
+</SCRIPT>
+<SCRIPT type="text/javascript">
+_uacct = "UA-3475067-1";
+urchinTracker();
+</SCRIPT>
+
+
+</BODY></HTML>
